@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata = {
-  title: "ELSI Program | English Learners Student Internship",
+  title: "ELSI 2025 | English Learners",
   description:
     "Hands-on internship for class 10-12 students by Maithree Roy’s English Learners.",
 };
