@@ -82,7 +82,7 @@ export default function Home() {
           </h1>
           <h2 className="text-xl md:text-2xl font-semibold text-white/90 text-center tracking-wide mb-2 flex items-center gap-2 justify-center">
             <Award size={22} className="text-[var(--color-lilacish)]" />
-            English Learners Student Internship
+            English Learners Summer Internship
           </h2>
           <div className="flex flex-col sm:flex-row gap-4 w-full justify-center mt-2">
             <button
@@ -119,7 +119,7 @@ export default function Home() {
             </span>
           </div>
           <p className="text-white/90 text-center text-lg">
-            ELSI (English Learners Student Internship) is a unique, hands-on
+            ELSI (English Learners Summer Internship) is a unique, hands-on
             program designed and run by English Learners. It offers students
             from classes 10 - 12 a chance to gain real-world experience in
             content creation, video editing, and social media management while
