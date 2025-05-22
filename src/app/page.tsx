@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
+import PushableButton from "../components/PushableButton";
+import SubmitTaskButton from "../components/SubmitTaskButton";
 import Logo from "../components/Logo";
 import {
-  FileText,
-  Send,
   UserRound,
   Youtube,
   Globe,
@@ -27,14 +27,14 @@ import {
 
 export default function Home() {
   const [showModal, setShowModal] = useState(false);
-  const [showMessage, setShowMessage] = useState("");
+  const [showApplyModal, setShowApplyModal] = useState(false);
 
   const openBrochure = () => {
     window.open("/ELSI-25.pdf", "_blank");
   };
 
-  const applyClick = () => {
-    setShowMessage("Will be active soon. Stay Tuned.");
+  const downloadTaskBooklet = () => {
+    window.open("/Task Booklet - ELSI-25.pdf", "_blank");
   };
 
   const loginClick = () => {
@@ -84,26 +84,50 @@ export default function Home() {
             <Award size={22} className="text-[var(--color-lilacish)]" />
             English Learners Summer Internship
           </h2>
-          <div className="flex flex-col sm:flex-row gap-4 w-full justify-center mt-2">
-            <button
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-10 w-full items-center justify-center mt-3">
+            <PushableButton
               onClick={openBrochure}
-              className="w-full sm:w-auto glass px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 text-[var(--color-lilacish)] bg-white/20 hover:bg-white/30 hover:text-[var(--color-navy)] transition shadow"
+              color="#00296b" // deep blue for Brochure
+              text="#fff"
             >
-              <FileText size={20} />
               Brochure
-            </button>
-            <button
-              onClick={applyClick}
-              className="w-full sm:w-auto glass px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 text-[var(--color-lilacish)] bg-white/20 animate-pulse hover:bg-white/30 hover:text-[var(--color-navy)] transition shadow"
+            </PushableButton>
+            <PushableButton
+              onClick={() => setShowApplyModal(true)}
+              color="#fdc500" // bright gold for Apply
+              text="#00296b"
             >
-              <Send size={20} />
               Apply
-            </button>
+            </PushableButton>
           </div>
-          {showMessage && (
-            <div className="text-white text-center text-lg font-semibold mt-2 flex items-center gap-2 justify-center">
-              <Sparkles size={20} className="text-[var(--color-lilacish)]" />
-              {showMessage}
+
+          {/* Apply Modal */}
+          {showApplyModal && (
+            <div className="fixed inset-0 flex items-center justify-center z-50">
+              <div
+                className="absolute inset-0 bg-black/60"
+                onClick={() => setShowApplyModal(false)}
+              ></div>
+              <div className="glass relative z-10 p-8 max-w-sm w-full text-center border-2 border-[var(--color-lilacish)] shadow-2xl flex flex-col gap-6 items-center bg-[#00142e]">
+                <h3 className="text-xl font-bold text-white mb-2">
+                  ELSI 2025 Application
+                </h3>
+                <div className="flex flex-col justify-center items-center gap-4 w-full">
+                  <PushableButton onClick={downloadTaskBooklet}>
+                    Task Booklet
+                  </PushableButton>
+                  <SubmitTaskButton
+                    onClick={() => (window.location.href = "/submit")}
+                  />
+                </div>
+                <button
+                  onClick={() => setShowApplyModal(false)}
+                  className="mt-4 text-[var(--color-lilacish)] underline"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           )}
         </div>
