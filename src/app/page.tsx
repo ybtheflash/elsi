@@ -104,10 +104,11 @@ export default function Home() {
 
           {/* Apply Modal */}
           {showApplyModal && (
-            <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="fixed inset-0 flex items-center justify-center z-[9999]">
               <div
-                className="absolute inset-0 bg-black/60"
+                className="absolute inset-0 bg-black/90"
                 onClick={() => setShowApplyModal(false)}
+                aria-label="Close apply modal"
               ></div>
               <div className="glass relative z-10 p-8 max-w-sm w-full text-center border-2 border-[var(--color-lilacish)] shadow-2xl flex flex-col gap-6 items-center bg-[#00142e]">
                 <h3 className="text-xl font-bold text-white mb-2">
