@@ -96,11 +96,11 @@ export default function Home() {
                 Brochure
               </PushableButton>
               <PushableButton
-                onClick={() => setShowApplyModal(true)}
-                color="#fdc500" // bright gold for Apply
+                onClick={() => setShowModal(true)}
+                color="#fdc500" // bright gold for Selections
                 text="#00296b"
               >
-                Apply
+                Selections
               </PushableButton>
             </div>
           </div>
@@ -308,21 +308,86 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Modal */}
+        {/* Selections Modal - always on top */}
         {showModal && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 flex items-center justify-center z-[9999]">
             <div
-              className="absolute inset-0 bg-black/40"
-              onClick={closeModal}
+              className="absolute inset-0 bg-black/90"
+              onClick={() => setShowModal(false)}
+              aria-label="Close selections modal"
             ></div>
-            <div className="glass relative z-10 p-8 max-w-xs w-full text-center border-2 border-[var(--color-lilacish)] shadow-2xl">
-              <p className="mb-4 font-semibold text-lg text-white flex items-center justify-center gap-2">
-                <UserRound size={22} className="text-[var(--color-lilacish)]" />
-                Hey! Hold your horses buddy, let&apos;s apply first?
-              </p>
+            <div className="glass relative z-10 p-8 max-w-sm w-full text-center border-2 border-[var(--color-lilacish)] shadow-2xl flex flex-col gap-6 items-center bg-[#00142e]">
+              <h3 className="text-xl font-bold text-white mb-2">
+                ELSI 2025 Selections
+              </h3>
+              <div className="flex flex-col justify-center items-center gap-4 w-full">
+                <div className="text-left w-full">
+                  <div className="mb-4">
+                    <span className="font-semibold text-[var(--color-lilacish)]">
+                      Content Writing
+                    </span>
+                    <ul className="list-disc list-inside ml-5 text-white/90 text-sm mt-1">
+                      <li>
+                        Vinayak Das{" "}
+                        <span className="text-xs text-gray-400">X</span>
+                      </li>
+                      <li>
+                        Rajorshav Ghosh{" "}
+                        <span className="text-xs text-gray-400">X</span>
+                      </li>
+                      <li>
+                        Avirup Tikader{" "}
+                        <span className="text-xs text-gray-400">XI</span>
+                      </li>
+                      <li>
+                        Sreedatri Ghosh{" "}
+                        <span className="text-xs text-gray-400">XI</span>
+                      </li>
+                      <li>
+                        Rajosi Ray{" "}
+                        <span className="text-xs text-gray-400">XI</span>
+                      </li>
+                      <li>
+                        Sneha Bose{" "}
+                        <span className="text-xs text-gray-400">XII</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="mb-4">
+                    <span className="font-semibold text-[var(--color-lilacish)]">
+                      Social Media Management
+                    </span>
+                    <ul className="list-disc list-inside ml-5 text-white/90 text-sm mt-1">
+                      <li>
+                        Sonal Jha{" "}
+                        <span className="text-xs text-gray-400">XI</span>
+                      </li>
+                      <li>
+                        Tiyasha Mukhopadhyay{" "}
+                        <span className="text-xs text-gray-400">XII</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-[var(--color-lilacish)]">
+                      Video Editing
+                    </span>
+                    <ul className="list-disc list-inside ml-5 text-white/90 text-sm mt-1">
+                      <li>
+                        Ritaja Roy{" "}
+                        <span className="text-xs text-gray-400">X</span>
+                      </li>
+                      <li>
+                        Avirup Tikader{" "}
+                        <span className="text-xs text-gray-400">XI</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
               <button
-                onClick={closeModal}
-                className="mt-2 px-6 py-2 rounded-xl font-semibold bg-[var(--color-lilacish)] text-[var(--color-navy)] hover:bg-[var(--color-navy)] hover:text-[var(--color-lilacish)] transition border border-[var(--color-lilacish)]"
+                onClick={() => setShowModal(false)}
+                className="mt-4 text-[var(--color-lilacish)] underline"
               >
                 Close
               </button>
@@ -331,7 +396,7 @@ export default function Home() {
         )}
 
         {/* Footer */}
-        <footer className="relative z-10 glass mx-4 md:mx-auto my-6 max-w-2xl flex flex-col sm:flex-row justify-center items-center gap-4 py-4 px-6 border-t border-[var(--color-lilacish)]">
+        <footer className="relative z-10 glass mx-4 md:mx-auto my-6 max-w-2xl flex flex-col sm:flex-row justify-center items-center gap-4 py-4 px-6 border-t border-[var(--color-lilacish]">
           <a
             href="https://www.youtube.com/@englishlearnersyt"
             target="_blank"
@@ -353,36 +418,6 @@ export default function Home() {
           </a>
         </footer>
       </div>
-
-      {/* Apply Modal - always on top */}
-      {showApplyModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-[9999]">
-          <div
-            className="absolute inset-0 bg-black/90"
-            onClick={() => setShowApplyModal(false)}
-            aria-label="Close apply modal"
-          ></div>
-          <div className="glass relative z-10 p-8 max-w-sm w-full text-center border-2 border-[var(--color-lilacish)] shadow-2xl flex flex-col gap-6 items-center bg-[#00142e]">
-            <h3 className="text-xl font-bold text-white mb-2">
-              ELSI 2025 Application
-            </h3>
-            <div className="flex flex-col justify-center items-center gap-4 w-full">
-              <PushableButton onClick={downloadTaskBooklet}>
-                Task Booklet
-              </PushableButton>
-              <SubmitTaskButton
-                onClick={() => (window.location.href = "/submit")}
-              />
-            </div>
-            <button
-              onClick={() => setShowApplyModal(false)}
-              className="mt-4 text-[var(--color-lilacish)] underline"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
