@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { PenTip } from "./PenTip";
 
 const ELText = () => (
-  <div className="relative w-12 h-12">
-    <motion.span className="absolute top-0 left-0 font-brand text-3xl text-primary">
+  <div className="relative w-12 h-12 md:w-12 md:h-12">
+    <motion.span className="absolute top-0 left-0 font-brand text-3xl md:text-3xl text-white select-none">
       E
     </motion.span>
-    <motion.span className="absolute bottom-0 right-0 font-brand text-3xl text-primary">
+    <motion.span className="absolute bottom-0 right-0 font-brand text-3xl md:text-3xl text-white select-none">
       L
     </motion.span>
   </div>
@@ -21,7 +21,6 @@ export default function Logo() {
     const interval = setInterval(() => {
       setShowPen((prev) => !prev);
     }, 3000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -37,7 +36,7 @@ export default function Logo() {
               opacity: 1,
               scale: 1.3,
               rotate: 180,
-              y: -7, // Added y transform
+              y: -7,
               transition: {
                 type: "spring",
                 stiffness: 200,
@@ -65,9 +64,8 @@ export default function Logo() {
                 cy="17"
                 r="18"
                 fill="none"
-                stroke="currentColor"
+                stroke="#fff"
                 strokeWidth="1.5"
-                className="text-primary"
                 initial={{ pathLength: 0, rotate: -90 }}
                 animate={{
                   pathLength: 1,
