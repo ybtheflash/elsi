@@ -17,9 +17,9 @@ export async function POST(request: Request) {
         // For security reasons, we send a success response even if the email doesn't exist.
         // This prevents attackers from guessing which emails are registered.
         return NextResponse.json({ message: 'Password reset email sent successfully.' }, { status: 200 });
-
     } catch (error: any) {
-        console.error("Forgot Password Error:", error);
+        // Log error for debugging but don't expose details to client
+        console.warn("Forgot Password Error:", error.code || 'Unknown error');
         // Return a generic error to the client
         return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
     }

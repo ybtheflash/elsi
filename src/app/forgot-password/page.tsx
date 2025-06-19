@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <Toaster richColors position="top-center" />
+      <Toaster richColors position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
         <div className="text-center">
             <Mail className="mx-auto h-12 w-12 text-blue-500" />

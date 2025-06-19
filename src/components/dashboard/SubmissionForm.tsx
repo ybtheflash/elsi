@@ -2,17 +2,25 @@
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'next/navigation';
 import { storage, ID } from '@/lib/appwrite';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '../ui/button';
 
 export default function SubmissionForm() {
   const { user } = useAuth();
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const { register, handleSubmit, reset } = useForm();
+  const searchParams = useSearchParams();
+  const taskId = searchParams.get('taskId');
+  const taskName = searchParams.get('taskName');
   const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID!;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,11 +28,12 @@ export default function SubmissionForm() {
       setFiles(Array.from(e.target.files));
     }
   };
-
   const onSubmit = async (data: any) => {
     if (!user || user.role !== 'intern') return;
     setLoading(true);
-    toast.loading('Submitting your task...');    try {
+    toast.loading('Submitting your task...');
+
+    try {
       // 1. Upload files to Appwrite
       const uploadedFileDetails: { id: string, name: string }[] = [];
       for (const file of files) {
@@ -40,17 +49,20 @@ export default function SubmissionForm() {
         submissionDate: new Date(data.week),
         title: data.title,
         description: data.description,
-        links: data.links.split(',').map((link: string) => link.trim()),
+        links: data.links ? data.links.split(',').map((link: string) => link.trim()).filter(Boolean) : [],
         fileDetails: uploadedFileDetails, // Use this instead of fileIds
         fileIds: uploadedFileDetails.map(file => file.id), // Keep for backward compatibility
         status: 'pending', // pending, approved, revision_needed
         points: 0,
+        taskId: taskId || null, // Add the task ID
+        taskName: taskName || 'General Submission', // Add the task name
         submittedAt: serverTimestamp(),
       });
 
       toast.success('Task submitted successfully!');
       reset();
-      setFiles([]);    } catch (error: any) {
+      setFiles([]);
+    } catch (error: any) {
       let errorMessage = 'An error occurred during submission.';
       
       if (error.code === 'permission-denied') {
@@ -67,41 +79,91 @@ export default function SubmissionForm() {
     } finally {
       setLoading(false);
     }
-  };
-
-  return (
-    <div className="p-8 max-w-2xl mx-auto bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-bold mb-6">Submit Weekly Task</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+  };  return (
+    <div className="flex flex-col items-center w-full min-h-[70vh] py-12 px-4 md:px-8" style={{ padding: '10px' }}>
+      {taskName && (
+        <div className="mb-8 p-6 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg shadow-sm w-full max-w-4xl">
+          <p className="text-blue-600 text-sm font-medium mb-1">Submitting for task:</p>
+          <p className="font-bold text-blue-900 text-xl">{taskName}</p>
+        </div>
+      )}
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full max-w-4xl grid grid-cols-1 gap-10 bg-white/80 rounded-2xl shadow-xl border border-gray-200 p-12 md:p-16 lg:p-20" style={{ padding: '10px' }}
+      >
         <div>
-          <label>Submission Title</label>
-          <input {...register('title', { required: true })} className="w-full mt-1 border p-2 rounded" />
+          <Label htmlFor="title">Submission Title <span className="text-destructive">*</span></Label>
+          <Input
+            id="title"
+            {...register('title', { required: true })}
+            placeholder="e.g., Weekly Progress Report - UI Design"
+            className="mt-4"
+          />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <Label htmlFor="domain">Select Your Domain <span className="text-destructive">*</span></Label>
+            <select
+              id="domain"
+              {...register('domain', { required: true })}
+              className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">Choose your domain</option>
+              {user?.domain?.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="week">Week Ending On <span className="text-destructive">*</span></Label>
+            <Input
+              id="week"
+              type="date"
+              {...register('week', { required: true })}
+              className="mt-2"
+            />
+          </div>
         </div>
         <div>
-          <label>Select Your Domain</label>
-          <select {...register('domain', { required: true })} className="w-full mt-1 border p-2 rounded">
-            {user?.domain?.map(d => <option key={d} value={d}>{d}</option>)}
-          </select>
-        </div>
-         <div>
-          <label>Week Ending On (Select Friday)</label>
-          <input type="date" {...register('week', { required: true })} className="w-full mt-1 border p-2 rounded" />
-        </div>
-        <div>
-          <label>Description</label>
-          <textarea {...register('description')} rows={4} className="w-full mt-1 border p-2 rounded"></textarea>
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            {...register('description')}
+            rows={5}
+            placeholder="Describe your work, methodology, achievements, and any challenges you encountered..."
+            className="mt-2"
+          />
         </div>
         <div>
-          <label>Relevant Links (comma-separated)</label>
-          <input {...register('links')} className="w-full mt-1 border p-2 rounded" />
+          <Label htmlFor="links">Relevant Links <span className="text-xs text-muted-foreground">(comma-separated)</span></Label>
+          <Input
+            id="links"
+            {...register('links')}
+            placeholder="https://github.com/yourproject, https://figma.com/design, https://demo.yoursite.com"
+            className="mt-2"
+          />
         </div>
         <div>
-          <label>Attach Files</label>
-          <input type="file" multiple onChange={handleFileChange} className="w-full mt-1" />
+          <Label>Attach Files</Label>
+          <div className="mt-2 border-2 border-dashed border-muted rounded-lg p-8 text-center relative">
+            <input
+              type="file"
+              multiple
+              onChange={handleFileChange}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+            <div className="flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-muted-foreground text-sm">Drag & drop files here, or click to select</span>
+              <span className="text-xs text-muted-foreground mt-1">Support for multiple file types</span>
+            </div>
+          </div>
+          {files.length > 0 && (
+            <div className="mt-2 text-xs text-muted-foreground">
+              {files.length} file(s) selected: {files.map(f => f.name).join(', ')}
+            </div>
+          )}
         </div>
-        <button type="submit" disabled={loading} className="w-full py-3 bg-green-600 text-white font-bold rounded disabled:bg-green-300">
+        <Button type="submit" disabled={loading} className="w-full text-base font-semibold py-4">
           {loading ? 'Submitting...' : 'Submit Task'}
-        </button>
+        </Button>
       </form>
     </div>
   );

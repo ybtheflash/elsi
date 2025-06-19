@@ -4,14 +4,25 @@ import Logo from "../../components/Logo";
 import { Home, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-export default function SubmitPage() {
-  useEffect(() => {
+export default function SubmitPage() {  useEffect(() => {
     const script = document.createElement("script");
     script.src = "//embed.typeform.com/next/embed.js";
     script.async = true;
+    
+    // Handle script loading errors
+    script.onerror = () => {
+      console.warn("Failed to load Typeform embed script");
+    };
+    
     document.body.appendChild(script);
+    
     return () => {
-      document.body.removeChild(script);
+      try {
+        document.body.removeChild(script);
+      } catch (error) {
+        // Script might have already been removed
+        console.warn("Script already removed or not found");
+      }
     };
   }, []);
 

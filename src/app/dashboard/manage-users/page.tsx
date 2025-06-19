@@ -5,7 +5,8 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/dashboard/Header';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
+import { Loader2, ShieldCheck } from 'lucide-react';
 
 type UserProfile = {
     uid: string;
@@ -29,79 +30,112 @@ export default function ManageUsersPage() {
             router.push('/dashboard');
         }
     }, [user, router]);
-    
-    useEffect(() => {
+      useEffect(() => {
         const fetchUsers = async () => {
-            const usersSnapshot = await getDocs(collection(db, 'users'));
-            const userList = usersSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
-            setUsers(userList);
-            setLoading(false);
+            try {
+                const usersSnapshot = await getDocs(collection(db, 'users'));
+                const userList = usersSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
+                setUsers(userList);
+            } catch (error) {
+                console.warn('Failed to fetch users:', error);
+                toast.error('Failed to load users. Please refresh the page.');
+                setUsers([]); // Set empty array as fallback
+            } finally {
+                setLoading(false);
+            }
         };
         if (user?.role === 'super-admin') {
             fetchUsers();
         }
-    }, [user]);
-
-    const handleRoleChange = async (uid: string, newRole: UserProfile['role']) => {
+    }, [user]);    const handleRoleChange = async (uid: string, newRole: UserProfile['role']) => {
         const userRef = doc(db, 'users', uid);
         try {
             await updateDoc(userRef, { role: newRole });
             setUsers(users.map(u => u.uid === uid ? { ...u, role: newRole } : u));
             toast.success("User role updated successfully.");
-        } catch (error) {
-            toast.error("Failed to update role.");
+        } catch (error: any) {
+            let errorMessage = "Failed to update role.";
+            
+            if (error.code === 'permission-denied') {
+                errorMessage = "You don't have permission to update user roles.";
+            } else if (error.code === 'network-request-failed') {
+                errorMessage = "Network error. Please check your connection and try again.";
+            }
+            
+            toast.error(errorMessage);
         }
-    };
-
-    if (loading || user?.role !== 'super-admin') {
+    };    if (loading || user?.role !== 'super-admin') {
         return (
-            <>
+            <div className="min-h-screen flex flex-col">
                 <Header title="Manage Users" />
-                <div className="mt-6 text-center">Loading or unauthorized...</div>
-            </>
+                <main className="flex-grow flex items-center justify-center p-4 sm:p-8">
+                    <div className="w-full max-w-md mx-auto text-center">
+                        <div className="glass-card">
+                            <Loader2 className="w-12 h-12 animate-spin mx-auto mb-6 text-indigo-600" />
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Users</h3>
+                            <p className="text-gray-600">Fetching user data, please wait...</p>
+                        </div>
+                    </div>
+                </main>
+            </div>
         );
     }
-    
-    return (
-        <>
+      return (
+        <div className="min-h-screen flex flex-col">
+            <Toaster 
+                richColors 
+                position="top-center" 
+                toastOptions={{ 
+                    style: { 
+                        zIndex: 99999,
+                        marginTop: '100px'
+                    } 
+                }} 
+            />
             <Header title="Manage Users" />
-            <div className="mt-6 bg-white rounded-lg shadow p-4">
-                <h3 className="font-semibold mb-4">User Administration</h3>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-4 py-2 text-left">Name</th>
-                                <th className="px-4 py-2 text-left">Email</th>
-                                <th className="px-4 py-2 text-left">Role</th>
-                                <th className="px-4 py-2 text-left">Domain(s)</th>
-                                <th className="px-4 py-2 text-center">Class</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {users.map(u => (
-                                <tr key={u.uid}>
-                                    <td className="px-4 py-2">{u.displayName}</td>
-                                    <td className="px-4 py-2">{u.email}</td>
-                                    <td className="px-4 py-2">
-                                        <select 
-                                            value={u.role} 
-                                            onChange={(e) => handleRoleChange(u.uid, e.target.value as UserProfile['role'])}
-                                            className="p-1 border rounded-md"
-                                        >
-                                            <option value="intern">Intern</option>
-                                            <option value="admin">Admin</option>
-                                            <option value="super-admin">Super Admin</option>
-                                        </select>
-                                    </td>
-                                    <td className="px-4 py-2">{u.domain?.join(', ') || 'N/A'}</td>
-                                    <td className="px-4 py-2 text-center">{u.studentClass || 'N/A'}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+            <div className="text-center py-8 px-4">
+                <h2 className="text-4xl font-bold text-white mb-3">User Administration</h2>
+                <p className="text-white/80 text-lg">Manage roles and permissions for all users.</p>
             </div>
-        </>
+            <main className="flex-grow p-4 sm:p-8">
+                <div className="w-full max-w-6xl mx-auto">
+                    <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/20">
+                        <div className="overflow-x-auto custom-scrollbar">
+                            <table className="min-w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-gray-200/80">
+                                        <th className="px-6 py-4 text-left font-semibold text-gray-700">Name</th>
+                                        <th className="px-6 py-4 text-left font-semibold text-gray-700">Email</th>
+                                        <th className="px-6 py-4 text-left font-semibold text-gray-700">Role</th>
+                                        <th className="px-6 py-4 text-left font-semibold text-gray-700">Domain(s)</th>
+                                        <th className="px-6 py-4 text-center font-semibold text-gray-700">Class</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {users.map(u => (
+                                        <tr key={u.uid} className="hover:bg-gray-500/10 transition-colors duration-200">
+                                            <td className="px-6 py-5 text-gray-800 font-medium whitespace-nowrap">{u.displayName}</td>
+                                            <td className="px-6 py-5 text-gray-600 whitespace-nowrap">{u.email}</td>
+                                            <td className="px-6 py-5">
+                                                <select 
+                                                    value={u.role} 
+                                                    onChange={(e) => handleRoleChange(u.uid, e.target.value as UserProfile['role'])}
+                                                    className="p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all appearance-none"
+                                                >                                                        <option value="intern">Intern</option>
+                                                    <option value="admin">Admin</option>
+                                                    <option value="super-admin">Super Admin</option>
+                                                </select>
+                                            </td>
+                                            <td className="px-6 py-5 text-gray-600">{u.domain?.join(', ') || 'N/A'}</td>
+                                            <td className="px-6 py-5 text-center text-gray-600">{u.studentClass || 'N/A'}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
     );
 }

@@ -16,7 +16,13 @@ export default function Home() {
   const navigateToDashboard = () => {
     router.push("/login");
   };  return (
-    <div className="min-h-screen flex flex-col">      {/* Dashboard Button - Top Right */}
+    <div className="min-h-screen flex flex-col">
+      {/* Brand Logo - Top Left */}
+      <div className="fixed top-4 left-4 z-50">
+        <Logo />
+      </div>
+
+      {/* Dashboard Button - Top Right */}
       <div className="dashboard-button">
         <ShinyButton onClick={navigateToDashboard} className="text-sm px-4 py-2">
           Dashboard
@@ -25,10 +31,6 @@ export default function Home() {
 
       {/* Main Section */}
       <main className="flex-1 flex flex-col items-center justify-center gap-8 md:gap-12 px-4">
-        {/* Brand logo above heading for presence */}
-        <div className="flex flex-col items-center gap-2 mb-2">
-          <Logo />
-        </div>
         <div className="text-center space-y-2 md:space-y-4">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 dark:from-purple-400 dark:via-pink-400 dark:to-indigo-400 bg-clip-text text-transparent mb-1 md:mb-2">
             ELSI 2025
@@ -65,13 +67,12 @@ export default function Home() {
               >
                 ×
               </button>
-            </div>
-            <div className="space-y-4 md:space-y-6 text-gray-700 dark:text-gray-200 text-base md:text-lg">
+            </div>            <div className="space-y-4 md:space-y-6 text-white text-base md:text-lg">
               <section>
-                <h3 className="font-semibold text-base md:text-lg mb-1">
+                <h3 className="font-semibold text-base md:text-lg mb-1 text-white">
                   What is ELSI?
                 </h3>
-                <p>
+                <p className="text-white">
                   ELSI (English Learners Summer Internship) is a hands-on program
                   for students of classes 10-12 to gain real-world experience in
                   content creation, video editing, and social media management
@@ -79,10 +80,9 @@ export default function Home() {
                 </p>
               </section>
               <section>
-                <h3 className="font-semibold text-base md:text-lg mb-1">
+                <h3 className="font-semibold text-base md:text-lg mb-1 text-white">
                   Quick Facts
-                </h3>
-                <ul className="list-disc list-inside ml-4 space-y-1">
+                </h3>                <ul className="list-disc list-inside ml-4 space-y-1 text-white">
                   <li>
                     <b>Duration:</b> 3 months (June - August)
                   </li>
@@ -104,21 +104,20 @@ export default function Home() {
                 </ul>
               </section>
               <section>
-                <h3 className="font-semibold text-base md:text-lg mb-1">
+                <h3 className="font-semibold text-base md:text-lg mb-1 text-white">
                   Selection Process
                 </h3>
-                <ul className="list-disc list-inside ml-4 space-y-1">
+                <ul className="list-disc list-inside ml-4 space-y-1 text-white">
                   <li>Apply and choose your preferred domain</li>
                   <li>Complete a short, domain-specific task</li>
                   <li>Judged on creativity, quality, and punctuality</li>
                   <li>Selected students join a private orientation group</li>
-                </ul>
-              </section>
+                </ul>              </section>
               <section>
-                <h3 className="font-semibold text-base md:text-lg mb-1">
+                <h3 className="font-semibold text-base md:text-lg mb-1 text-white">
                   What You'll Gain
                 </h3>
-                <ul className="list-disc list-inside ml-4 space-y-1">
+                <ul className="list-disc list-inside ml-4 space-y-1 text-white">
                   <li>Real project experience</li>
                   <li>Team collaboration</li>
                   <li>Certificates & recognition</li>

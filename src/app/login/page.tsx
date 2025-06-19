@@ -89,7 +89,7 @@ export default function LoginPage() {
 
       {/* Main content container */}
       <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-8">
-        <Toaster richColors />
+        <Toaster richColors toastOptions={{ style: { zIndex: 9999 } }} />
         
         {/* Heading outside the form */}
         <div className="text-center space-y-3">

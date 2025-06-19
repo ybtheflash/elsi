@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
+    "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "appwrite": "^18.1.1",
     "class-variance-authority": "^0.7.1",
@@ -21,6 +23,7 @@
     "lucide-react": "^0.511.0",
     "motion": "^12.18.1",
     "next": "15.3.2",
+    "node-appwrite": "^17.0.0",
     "nodemailer": "^7.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

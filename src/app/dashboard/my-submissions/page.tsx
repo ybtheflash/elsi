@@ -7,9 +7,10 @@ import { useAuth } from '@/context/AuthContext';
 import { db, auth } from '@/lib/firebase';
 import { storage, ID } from '@/lib/appwrite';
 import { collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import Header from '@/components/dashboard/Header';
 import { Edit, MessageSquare, CheckCircle, Clock, AlertCircle, Award, FileText, Link as LinkIcon, Trash2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 type Submission = {
     id: string;
@@ -129,6 +130,34 @@ export default function MySubmissionsPage() {
         }
     };
 
+    const handleRecallSubmission = async (subId: string) => {
+        if (!window.confirm("Are you sure you want to recall this submission? This action cannot be undone.")) {
+            return;
+        }
+
+        const toastId = toast.loading("Recalling submission...");
+        try {
+            const token = await auth.currentUser?.getIdToken();
+            const response = await fetch('/api/submissions/recall', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ submissionId: subId })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to recall submission.');
+            }
+
+            toast.success("Submission recalled successfully.", { id: toastId });
+        } catch (error: any) {
+            toast.error(error.message, { id: toastId });
+        }
+    };
+
     const getStatusIcon = (status: Submission['status']) => {
         switch (status) {
             case 'approved': return <CheckCircle className="text-green-500" />;
@@ -138,93 +167,206 @@ export default function MySubmissionsPage() {
 
     const getFileUrl = (fileId: string) => {
         return storage.getFileView(BUCKET_ID, fileId);
-    };
-
-    if (loading) {
-        return <><Header title="My Submissions" /><div className="p-6">Loading...</div></>;
-    }
-
-    return (
-        <div className="bg-gray-50 min-h-screen">
+    };    if (loading) {
+        return (
+            <div className="min-h-screen flex flex-col">
+                <Header title="My Submissions" />
+                <main className="flex-grow flex items-center justify-center p-4 sm:p-8">
+                    <div className="w-full max-w-md mx-auto text-center">
+                        <div className="glass-card">
+                            <Loader2 className="w-12 h-12 animate-spin mx-auto mb-6 text-indigo-600" />
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Submissions</h3>
+                            <p className="text-gray-600">Fetching your submission history...</p>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }    return (
+        <div className="min-h-screen flex flex-col">
+            <Toaster 
+                richColors 
+                position="top-center" 
+                toastOptions={{ 
+                    style: { 
+                        zIndex: 99999,
+                        marginTop: '100px'
+                    } 
+                }} 
+            />
             <Header title="My Submissions" />
-            <main className="p-4 sm:p-6">
-                <div className="space-y-6">
+            <div className="text-center py-8 px-4">
+                <h2 className="text-4xl font-bold text-white mb-3">My Submissions</h2>
+                <p className="text-white/80 text-lg">Track, edit, and view feedback on your work.</p>
+            </div>
+            <main className="flex-grow p-4 sm:p-8">
+                <div className="w-full max-w-6xl mx-auto">
                     {submissions.length === 0 ? (
-                        <p className="text-center text-gray-500 py-10">You haven't made any submissions yet.</p>
-                    ) : (
-                        submissions.map(sub => (
-                            <div key={sub.id} className="bg-white p-5 rounded-lg shadow-md transition-shadow hover:shadow-lg">
-                                <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
-                                    <h3 className="text-xl font-semibold text-gray-800">{sub.title}</h3>
-                                    <span className="text-xs font-mono text-gray-500">{new Date(sub.submittedAt.seconds * 1000).toLocaleString()}</span>
+                        <div className="max-w-lg mx-auto text-center">
+                            <div className="glass-card p-16">
+                                <div className="w-24 h-24 bg-white/10 rounded-3xl mx-auto mb-8 flex items-center justify-center">
+                                    <FileText className="w-12 h-12 text-white/80" />
                                 </div>
-
-                                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 mb-4">
-                                    <div className="flex items-center gap-1.5"><span className="font-semibold">{sub.domain}</span></div>
-                                    <div className="flex items-center gap-1.5">{getStatusIcon(sub.status)} <span className="capitalize">{sub.status.replace('_', ' ')}</span></div>
-                                    <div className="flex items-center gap-1.5"><Award className="text-indigo-500" /> <span className="font-bold">{sub.points}</span> Points</div>
-                                </div>
-
-                                {sub.description && <p className="text-sm text-gray-700 mb-4">{sub.description}</p>}
-                                
-                                {sub.fileDetails && sub.fileDetails.length > 0 && (
-                                    <div className="mb-4">
-                                        <h4 className="font-semibold text-sm mb-2">Files:</h4>
-                                        <div className="flex flex-col gap-2">
-                                            {sub.fileDetails.map(file => (
-                                                <a key={file.id} href={getFileUrl(file.id)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline text-sm">
-                                                    <FileText size={16} /> {file.name}
-                                                </a>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {sub.links && sub.links.length > 0 && (
-                                    <div className="mb-4">
-                                        <h4 className="font-semibold text-sm mb-2">Links:</h4>
-                                        <div className="flex flex-col gap-2">
-                                            {sub.links.map((link, i) => (
-                                                <a key={i} href={link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline text-sm truncate">
-                                                    <LinkIcon size={16} /> {link}
-                                                </a>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="border-t pt-3 flex items-center gap-4">
-                                    <button onClick={() => openEditModal(sub)} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
-                                        <Edit size={16} /> Edit
-                                    </button>
-                                    {sub.feedback && (
-                                        <button onClick={() => setFeedbackToShow(sub.feedback!)} className="flex items-center gap-1.5 text-sm px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors">
-                                            <MessageSquare size={16} /> View Feedback
-                                        </button>
-                                    )}
-                                </div>
+                                <h3 className="text-2xl font-bold text-white mb-4">No Submissions Yet</h3>
+                                <p className="text-white/80 text-lg">You haven't made any submissions yet. Check your tasks to get started!</p>
                             </div>
-                        ))
+                        </div>
+                    ) : (
+                        <div className="space-y-8">
+                            {submissions.map(sub => (
+                                <div key={sub.id} className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+                                    <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-6">
+                                        <div className="flex-1">
+                                            <h3 className="text-2xl font-bold text-gray-800 mb-3">{sub.title}</h3>
+                                            <div className="flex flex-wrap items-center gap-4 mb-4">
+                                                <span className="px-4 py-2 bg-gray-100 rounded-xl font-medium text-gray-700">
+                                                    {sub.domain}
+                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    {getStatusIcon(sub.status)}
+                                                    <span className="capitalize text-gray-700 font-medium">
+                                                        {sub.status.replace('_', ' ')}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-purple-600">
+                                                    <Award size={20} />
+                                                    <span className="font-bold text-lg">{sub.points} Points</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right flex-shrink-0">
+                                            <span className="text-sm text-gray-500 font-mono">
+                                                {new Date(sub.submittedAt.seconds * 1000).toLocaleDateString()} at{' '}
+                                                {new Date(sub.submittedAt.seconds * 1000).toLocaleTimeString()}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {sub.description && (
+                                        <div className="mb-6">
+                                            <p className="text-gray-700 leading-relaxed text-lg">{sub.description}</p>
+                                        </div>
+                                    )}
+                                    
+                                    {(sub.fileDetails && sub.fileDetails.length > 0) || (sub.links && sub.links.length > 0) ? (
+                                        <div className="grid md:grid-cols-2 gap-6 mb-6">
+                                            {sub.fileDetails && sub.fileDetails.length > 0 && (
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-800 mb-4 text-lg">Attached Files:</h4>
+                                                    <div className="grid gap-3">
+                                                        {sub.fileDetails.map(file => (
+                                                            <a 
+                                                                key={file.id} 
+                                                                href={getFileUrl(file.id)} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer" 
+                                                                className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all duration-200 text-gray-800 hover:scale-[1.02] border border-gray-200"
+                                                            >
+                                                                <FileText size={20} className="text-blue-500" />
+                                                                <span className="font-medium">{file.name}</span>
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {sub.links && sub.links.length > 0 && (
+                                                <div>
+                                                    <h4 className="font-semibold text-gray-800 mb-4 text-lg">External Links:</h4>
+                                                    <div className="grid gap-3">
+                                                        {sub.links.map((link, i) => (
+                                                            <a 
+                                                                key={i} 
+                                                                href={link} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer" 
+                                                                className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all duration-200 text-gray-800 hover:scale-[1.02] truncate border border-gray-200"
+                                                            >
+                                                                <LinkIcon size={20} className="text-green-500 flex-shrink-0" />
+                                                                <span className="truncate">{link}</span>
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : null}
+
+                                    <div className="border-t border-gray-200 pt-6 flex flex-wrap items-center gap-4">
+                                        <button 
+                                            onClick={() => openEditModal(sub)} 
+                                            className="flex items-center gap-2 px-6 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-2xl font-medium transition-all duration-200 hover:scale-105"
+                                        >
+                                            <Edit size={18} /> Edit
+                                        </button>
+                                        {sub.feedback && (
+                                            <button 
+                                                onClick={() => setFeedbackToShow(sub.feedback!)} 
+                                                className="flex items-center gap-2 px-6 py-3 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-2xl font-medium transition-all duration-200 hover:scale-105"
+                                            >
+                                                <MessageSquare size={18} /> View Feedback
+                                            </button>
+                                        )}
+                                        {sub.status === 'pending' && (
+                                            <button
+                                                onClick={() => handleRecallSubmission(sub.id)}
+                                                className="flex items-center gap-2 px-6 py-3 bg-red-100 hover:bg-red-200 text-red-700 rounded-2xl font-medium transition-all duration-200 hover:scale-105"
+                                            >
+                                                <Trash2 size={18} /> Recall Submission
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     )}
                 </div>
-            </main>
-
-            {/* Edit Modal */}
+            </main>            {/* Edit Modal */}
             {editingSubmission && (
-                <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={() => setEditingSubmission(null)}>
-                    <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6" onClick={() => setEditingSubmission(null)}>
+                    <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 w-full max-w-3xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <form onSubmit={handleSubmit(handleEditSubmit)}>
-                            <div className="p-6">
-                                <h2 className="text-xl font-bold mb-4">Edit Submission</h2>
-                                <div className="space-y-4">
-                                    <div><label className="font-semibold">Title</label><input {...register('title')} className="w-full mt-1 border p-2 rounded" /></div>
-                                    <div><label className="font-semibold">Description</label><textarea {...register('description')} rows={4} className="w-full mt-1 border p-2 rounded"></textarea></div>
-                                    <div><label className="font-semibold">Links (comma-separated)</label><input {...register('links')} className="w-full mt-1 border p-2 rounded" /></div>
+                            <div className="p-8">
+                                <h2 className="text-3xl font-bold text-gray-800 mb-8">Edit Submission</h2>
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-lg font-semibold text-gray-700 mb-3">Title</label>
+                                        <input 
+                                            {...register('title')} 
+                                            className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all" 
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-lg font-semibold text-gray-700 mb-3">Description</label>
+                                        <textarea 
+                                            {...register('description')} 
+                                            rows={5} 
+                                            className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all resize-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-lg font-semibold text-gray-700 mb-3">Links (comma-separated)</label>
+                                        <input 
+                                            {...register('links')} 
+                                            className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all" 
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="bg-gray-50 px-6 py-3 flex justify-end gap-3">
-                                <button type="button" onClick={() => setEditingSubmission(null)} className="px-4 py-2 bg-gray-200 rounded-md">Cancel</button>
-                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700">Save Changes</button>
+                            <div className="bg-gray-50/80 backdrop-blur-sm px-8 py-6 flex justify-end gap-4 rounded-b-3xl">
+                                <button 
+                                    type="button" 
+                                    onClick={() => setEditingSubmission(null)} 
+                                    className="px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-2xl transition-all duration-200 hover:scale-105"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-all duration-200 hover:scale-105"
+                                >
+                                    Save Changes
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -233,12 +375,21 @@ export default function MySubmissionsPage() {
 
             {/* Feedback Modal */}
             {feedbackToShow && (
-                <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" onClick={() => setFeedbackToShow(null)}>
-                    <div className="bg-white p-6 rounded-lg shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-lg font-bold mb-3">Admin Feedback</h3>
-                        <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-md">{feedbackToShow}</p>
-                        <div className="text-right mt-4">
-                            <button onClick={() => setFeedbackToShow(null)} className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">Close</button>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6" onClick={() => setFeedbackToShow(null)}>
+                    <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 w-full max-w-2xl" onClick={e => e.stopPropagation()}>
+                        <div className="p-8">
+                            <h3 className="text-3xl font-bold text-gray-800 mb-6">Admin Feedback</h3>
+                            <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed text-lg">{feedbackToShow}</p>
+                            </div>
+                            <div className="text-right mt-8">
+                                <button 
+                                    onClick={() => setFeedbackToShow(null)} 
+                                    className="px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-2xl transition-all duration-200 hover:scale-105"
+                                >
+                                    Close
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

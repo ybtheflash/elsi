@@ -22,23 +22,33 @@ const AuthContext = createContext<AuthContextType>({ user: null, loading: true }
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
-    const router = useRouter();
-
-    useEffect(() => {
+    const router = useRouter();    useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            if (firebaseUser) {
-                const docRef = doc(db, 'users', firebaseUser.uid);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    setUser({ ...firebaseUser, ...docSnap.data() });
+            try {
+                if (firebaseUser) {
+                    const docRef = doc(db, 'users', firebaseUser.uid);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        setUser({ ...firebaseUser, ...docSnap.data() });
+                    } else {
+                        // User exists in Auth but not Firestore, handle this case
+                        setUser(firebaseUser);
+                    }
                 } else {
-                    // User exists in Auth but not Firestore, handle this case
-                    setUser(firebaseUser);
+                    setUser(null);
                 }
-            } else {
-                setUser(null);
+            } catch (error) {
+                // If there's an error fetching user data, still set the firebase user
+                // This prevents the app from breaking due to network issues
+                console.warn('Error fetching user profile:', error);
+                if (firebaseUser) {
+                    setUser(firebaseUser);
+                } else {
+                    setUser(null);
+                }
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return () => unsubscribe();

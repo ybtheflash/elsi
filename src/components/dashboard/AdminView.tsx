@@ -153,136 +153,160 @@ export default function AdminView() {
     const getFileUrl = (fileId: string) => {
         const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID!;
         return storage.getFileView(BUCKET_ID, fileId);
-    };
-
-    if (loading) return <p className="text-center p-6">Loading submissions...</p>;
-
-    return (
-        <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-xl font-semibold mb-4">Review Submissions</h3>
-            <div className="overflow-x-auto">
-                <table className="min-w-full bg-white text-sm">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-4 py-3 text-left font-semibold text-gray-600">Intern</th>
-                            <th className="px-4 py-3 text-left font-semibold text-gray-600">Details</th>
-                            <th className="px-4 py-3 text-left font-semibold text-gray-600">Files & Links</th>
-                            <th className="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
-                            <th className="px-4 py-3 text-left font-semibold text-gray-600">Feedback</th>
-                            <th className="px-4 py-3 text-left font-semibold text-gray-600">Points</th>
-                            <th className="px-4 py-3 text-center font-semibold text-gray-600">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {submissions.map((sub) => (
-                            <tr key={sub.id}>
-                                <td className="px-4 py-3 align-top">{sub.internName}</td>
-                                <td className="px-4 py-3 align-top max-w-xs">
-                                    <p className="font-bold">{sub.title}</p>
-                                    <p className="text-gray-600">{sub.domain}</p>
-                                </td>
-                                <td className="px-4 py-3 align-top">                                    {sub.fileDetails?.map(file => (
-                                        <a 
-                                            key={file.id} 
-                                            href={getFileUrl(file.id)} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer" 
-                                            className="text-blue-600 hover:underline block truncate"
-                                        >
-                                            {file.name}
-                                        </a>
-                                    ))}
-                                    {sub.links?.map((link, i) => (
-                                        <a 
-                                            key={i} 
-                                            href={link} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer" 
-                                            className="text-green-600 hover:underline block truncate"
-                                        >
-                                            <LinkIcon size={14} className="inline-block mr-1"/>
-                                            {link}
-                                        </a>
-                                    ))}
-                                </td>
-                                <td className="px-4 py-3 align-top">
-                                    <select 
-                                        value={sub.status} 
-                                        onChange={(e) => handleUpdateStatus(sub.id, e.target.value as Submission['status'])} 
-                                        className="p-2 border rounded-md"
-                                    >
-                                        <option value="pending">Pending</option>
-                                        <option value="approved">Approved</option>
-                                        <option value="revision_needed">Needs Revision</option>
-                                    </select>
-                                </td>
-                                <td className="px-4 py-3 align-top">
-                                    <textarea 
-                                        defaultValue={sub.feedback || ''} 
-                                        onBlur={(e) => handleUpdateFeedback(sub.id, e.target.value)} 
-                                        className="w-full text-sm border rounded p-2" 
-                                        rows={2}
-                                    />
-                                </td>
-                                <td className="px-4 py-3 align-top">
-                                    <input 
-                                        type="number" 
-                                        defaultValue={sub.points} 
-                                        onBlur={(e) => handleUpdatePoints(sub.id, parseInt(e.target.value))} 
-                                        className="w-20 text-center border rounded p-2"
-                                    />
-                                </td>
-                                <td className="px-4 py-3 text-center align-top">
-                                    <button 
-                                        onClick={() => handleViewLogs(sub)} 
-                                        className="flex items-center gap-1.5 mx-auto text-sm px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
-                                    >
-                                        <History size={16} /> Logs
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+    };    if (loading) {
+        return (
+            <div className="w-full text-center p-12 glass-container rounded-3xl">
+                <div className="animate-pulse">
+                    <div className="w-20 h-20 bg-white/20 rounded-3xl mx-auto mb-6"></div>
+                    <div className="h-8 bg-white/20 rounded-xl w-56 mx-auto mb-4"></div>
+                    <div className="h-4 bg-white/20 rounded-lg w-40 mx-auto"></div>
+                </div>
             </div>
-
-            {/* Logs Modal */}
+        );
+    }    return (
+        <div className="w-full glass-container p-8 rounded-3xl">
+            <div className="overflow-hidden rounded-2xl border border-white/20">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full bg-black/20 backdrop-blur-xl">
+                        <thead className="bg-black/30">
+                            <tr>
+                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Intern</th>
+                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Details</th>
+                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Files & Links</th>
+                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Feedback</th>
+                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Points</th>
+                                <th className="px-6 py-5 text-center text-sm font-semibold text-white/80 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/10">
+                            {submissions.map((sub) => (
+                                <tr key={sub.id} className="hover:bg-black/20 transition-colors">
+                                    <td className="px-6 py-5 align-top text-white font-medium whitespace-nowrap">{sub.internName}</td>
+                                    <td className="px-6 py-5 align-top max-w-xs">
+                                        <p className="font-bold text-white text-base">{sub.title}</p>
+                                        <p className="text-white/70 mt-1 text-sm">{sub.domain}</p>
+                                        {sub.description && (
+                                            <p className="text-white/60 text-sm mt-2 line-clamp-2">{sub.description}</p>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-5 align-top space-y-3">
+                                        {sub.fileDetails?.map(file => (
+                                            <a 
+                                                key={file.id} 
+                                                href={getFileUrl(file.id)} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer" 
+                                                className="flex items-center gap-3 text-blue-300 hover:text-blue-200 transition-colors text-sm font-medium"
+                                            >
+                                                <div className="w-2.5 h-2.5 bg-blue-400 rounded-full flex-shrink-0"></div>
+                                                <span className="truncate">{file.name}</span>
+                                            </a>
+                                        ))}
+                                        {sub.links?.map((link, i) => (
+                                            <a 
+                                                key={i} 
+                                                href={link} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer" 
+                                                className="flex items-center gap-3 text-emerald-300 hover:text-emerald-200 transition-colors text-sm font-medium"
+                                            >
+                                                <LinkIcon size={16} className="flex-shrink-0"/>
+                                                <span className="truncate">{link}</span>
+                                            </a>
+                                        ))}
+                                    </td>
+                                    <td className="px-6 py-5 align-top">
+                                        <select 
+                                            value={sub.status} 
+                                            onChange={(e) => handleUpdateStatus(sub.id, e.target.value as Submission['status'])} 
+                                            className="p-3 bg-black/20 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-lg backdrop-blur-sm [color-scheme:dark]"
+                                        >
+                                            <option value="pending">Pending</option>
+                                            <option value="approved">Approved</option>
+                                            <option value="revision_needed">Needs Revision</option>
+                                        </select>
+                                    </td>
+                                    <td className="px-6 py-5 align-top">
+                                        <textarea 
+                                            defaultValue={sub.feedback || ''} 
+                                            onBlur={(e) => handleUpdateFeedback(sub.id, e.target.value)} 
+                                            className="w-full p-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none shadow-lg backdrop-blur-sm"
+                                            rows={3}
+                                            placeholder="Add feedback..."
+                                        />
+                                    </td>
+                                    <td className="px-6 py-5 align-top">
+                                        <input 
+                                            type="number" 
+                                            defaultValue={sub.points} 
+                                            onBlur={(e) => handleUpdatePoints(sub.id, parseInt(e.target.value))} 
+                                            className="w-24 text-center p-3 bg-black/20 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-lg backdrop-blur-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            min="0"
+                                        />
+                                    </td>
+                                    <td className="px-6 py-5 text-center align-top">
+                                        <button 
+                                            onClick={() => handleViewLogs(sub)} 
+                                            className="flex items-center gap-2 mx-auto px-4 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 text-purple-200 rounded-xl font-medium transition-all duration-200 hover:scale-105 text-sm backdrop-blur-sm"
+                                        >
+                                            <History size={16} /> View Logs
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>            {/* Logs Modal */}
             {viewingLogsFor && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4" 
+                    className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-50 p-6"
                     onClick={() => setViewingLogsFor(null)}
                 >
                     <div 
-                        className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col" 
+                        className="glass-container-2 rounded-3xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col border border-white/20"
                         onClick={e => e.stopPropagation()}
                     >
-                        <div className="p-4 border-b">
-                            <h3 className="text-lg font-bold">Edit History for "{viewingLogsFor.title}"</h3>
+                        <div className="p-8 border-b border-white/10">
+                            <h3 className="text-2xl font-bold text-white">Edit History</h3>
+                            <p className="text-white/70 mt-2">for "{viewingLogsFor.title}"</p>
                         </div>
-                        <div className="p-4 overflow-y-auto">
+                        <div className="p-8 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
                             {logsLoading ? (
-                                <p>Loading logs...</p>
+                                <div className="text-center">
+                                    <div className="animate-pulse">
+                                        <div className="w-16 h-16 bg-white/20 rounded-2xl mx-auto mb-4"></div>
+                                        <div className="h-4 bg-white/20 rounded-lg w-40 mx-auto"></div>
+                                    </div>
+                                </div>
                             ) : (
-                                <ul className="space-y-4">
+                                <div className="space-y-4">
                                     {currentLogs.length > 0 ? (
                                         currentLogs.map(log => (
-                                            <li key={log.id} className="text-sm">
-                                                <p className="font-semibold">{log.action}</p>
-                                                <p className="text-gray-500">
-                                                    by <span className="font-medium text-gray-700">{log.actorName}</span> at {new Date(log.timestamp.seconds * 1000).toLocaleString()}
+                                            <div key={log.id} className="p-5 bg-black/20 rounded-2xl border border-white/10">
+                                                <p className="font-semibold text-white mb-2">{log.action}</p>
+                                                <p className="text-white/60 text-sm">
+                                                    by <span className="font-medium text-white/90">{log.actorName}</span> at{' '}
+                                                    <span className="font-mono text-white/90">{new Date(log.timestamp.seconds * 1000).toLocaleString()}</span>
                                                 </p>
-                                            </li>
+                                            </div>
                                         ))
                                     ) : (
-                                        <p>No edit history found for this submission.</p>
+                                        <div className="text-center py-8">
+                                            <div className="w-20 h-20 bg-black/20 rounded-3xl mx-auto mb-5 flex items-center justify-center border border-white/10">
+                                                <History className="w-9 h-9 text-white/40" />
+                                            </div>
+                                            <p className="text-white/60">No edit history found for this submission.</p>
+                                        </div>
                                     )}
-                                </ul>
+                                </div>
                             )}
                         </div>
-                        <div className="bg-gray-50 px-4 py-3 text-right">
+                        <div className="bg-black/30 px-8 py-6 rounded-b-3xl text-right border-t border-white/10">
                              <button 
                                 onClick={() => setViewingLogsFor(null)} 
-                                className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
+                                className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-2xl transition-all duration-200 hover:scale-105"
                             >
                                 Close
                             </button>

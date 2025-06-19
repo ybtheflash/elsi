@@ -22,17 +22,14 @@ export default function Logo() {
       setShowPen((prev) => !prev);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
-
-  return (
+  }, []);  return (
     <div className="relative w-12 h-12 flex items-center justify-center">
       <AnimatePresence mode="wait">
         {showPen ? (
           <motion.div
             key="pen"
             className="relative"
-            initial={{ opacity: 0, scale: 0, rotate: 180, y: 0 }}
-            animate={{
+            initial={{ opacity: 0, scale: 0, rotate: 180, y: 0 }}            animate={{
               opacity: 1,
               scale: 1.3,
               rotate: 180,
@@ -51,8 +48,7 @@ export default function Logo() {
             }}
           >
             <PenTip />
-            {/* Animated Circle */}
-            <svg
+            {/* Animated Circle */}            <svg
               className="absolute inset-0 w-full h-full"
               viewBox="0 0 48 48"
               style={{
