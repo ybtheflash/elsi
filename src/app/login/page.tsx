@@ -13,11 +13,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+  CardContent
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -104,16 +100,16 @@ export default function LoginPage() {
         <Card className="relative overflow-hidden max-w-[450px] w-full bg-transparent border-0">
           <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
           
-          <CardContent className="p-10">
+          <CardContent className="p-10" style={{ padding: '20px' }}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               <div className="space-y-6">
-                <div className="space-y-3">
-                  <Label htmlFor="email" className="text-sm font-medium text-white">Email</Label>
+                <div className="space-y-3" style={{ paddingBottom: '20px' }}>
+                  <Label htmlFor="email" className="text-sm font-medium text-white" style={{ paddingBottom: '5px' }}>Email</Label>
                   <Input
                     id="email"
                     type="email"
                     placeholder="name@example.com"
-                    className="h-14 px-6 text-base rounded-xl bg-white/90 backdrop-blur border-white/20 focus:border-purple-400 focus:ring-purple-400 placeholder:text-gray-500"
+                    className="h-14 px-6 text-base rounded-xl bg-white/90 backdrop-blur border-white/20 focus:border-purple-400 focus:ring-purple-400 placeholder:text-gray-500" style={{ paddingLeft: '10px' }}
                     {...register('email')}
                   />
                   {errors.email && (
@@ -121,13 +117,13 @@ export default function LoginPage() {
                   )}
                 </div>
                 
-                <div className="space-y-3">
-                  <Label htmlFor="password" className="text-sm font-medium text-white">Password</Label>
+                <div className="space-y-3" style={{ paddingBottom: '20px' }}>
+                  <Label htmlFor="password" className="text-sm font-medium text-white" style={{ paddingBottom: '5px' }}>Password</Label>
                   <Input
                     id="password"
                     type="password"
                     placeholder="Enter your password"
-                    className="h-14 px-6 text-base rounded-xl bg-white/90 backdrop-blur border-white/20 focus:border-purple-400 focus:ring-purple-400 placeholder:text-gray-500"
+                    className="h-14 px-6 text-base rounded-xl bg-white/90 backdrop-blur border-white/20 focus:border-purple-400 focus:ring-purple-400 placeholder:text-gray-500" style={{ paddingLeft: '10px' }}
                     {...register('password')}                  />
                   {errors.password && (
                     <p className="text-red-400 text-sm mt-1">{errors.password.message as string}</p>
@@ -135,7 +131,7 @@ export default function LoginPage() {
                 </div>
                 
                 {/* Forgot password link */}
-                <div className="text-right">
+                <div className="text-right" style={{ paddingBottom: '20px' }}>
                   <Link href="/forgot-password" className="text-sm font-medium text-white/80 hover:text-white transition-colors">
                     Forgot password?
                   </Link>

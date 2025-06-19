@@ -60,38 +60,42 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/wallpaper.jpg')" }}>
       <Toaster richColors position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <div className="text-center">
-            <Mail className="mx-auto h-12 w-12 text-blue-500" />
-            <h2 className="mt-4 text-2xl font-bold">Forgot Your Password?</h2>
-            <p className="mt-2 text-sm text-gray-600">
+      <div className="w-full max-w-md p-10 bg-black/10 rounded-2xl shadow-2xl border border-lilac-200 backdrop-blur-md flex flex-col gap-8" style={{ padding: '24px' }}>
+        <div className="text-center flex flex-col gap-3">
+            <div className="flex items-center justify-center mb-2">
+              <span className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-lilac-100 shadow-lg">
+                <Mail className="h-10 w-10 text-lilac-500" />
+              </span>
+            </div>
+            <h2 className="text-3xl font-extrabold text-lilac-200">Forgot Your Password?</h2>
+            <p className="text-base text-lilac-200">
                 No problem. Enter your email address below and we'll send you a link to reset it.
             </p>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="sr-only">Email address</label>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="email" className="block text-sm font-medium text-lilac-200">Email address</label>
             <input 
               id="email"
               type="email" 
               placeholder="Enter your email address"
               {...register('email')} 
-              className="w-full px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border-2 border-lilac-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-lilac-400 focus:border-lilac-400 bg-lilac-50 text-lilac-900 placeholder-lilac-400 transition-all"
             />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message as string}</p>}
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message as string}</p>}
           </div>
           <button 
             type="submit" 
             disabled={loading} 
-            className="w-full py-2 font-bold text-white bg-blue-600 rounded-md disabled:bg-blue-300 hover:bg-blue-700 transition-colors"
+            className="w-full py-3 font-bold text-white bg-gradient-to-r from-lilac-500 to-lilac-600 rounded-lg disabled:bg-lilac-300 hover:from-lilac-600 hover:to-lilac-200 transition-all shadow-lilac-200/40"
           >
             {loading ? 'Sending...' : 'Send Reset Link'}
           </button>
         </form>
-        <div className="text-center">
-            <Link href="/login" className="text-sm font-medium text-blue-600 hover:underline">
+        <div className="text-center pt-2" style={{ paddingBottom: '20px' }}>
+            <Link href="/login" className="text-sm font-semibold text-lilac-600 hover:underline transition-colors">
                 Back to Login
             </Link>
         </div>

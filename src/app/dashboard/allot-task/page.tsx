@@ -125,7 +125,7 @@ export default function AllotTaskPage() {
             setLoading(false);
         }
     };    return (
-        <div className="min-h-screen bg-black/90 text-white">
+        <div className="min-h-screen bg-black/50 text-white">
             <Toaster 
                 richColors 
                 position="top-center" 
@@ -138,15 +138,14 @@ export default function AllotTaskPage() {
             />
             <Header title="Allot New Task" />
             <div className="text-center py-8 px-4">
-                <h2 className="text-4xl font-bold text-white mb-3">Create New Task</h2>
-                <p className="text-white/80 text-lg">Fill in the details below to assign a new task to interns.</p>
+                <h2 className="text-4xl font-bold text-white mb-3" style={{ paddingTop: '20px' }}>Create New Task</h2>
+                <p className="text-white/80 text-lg" style={{ paddingBottom: '20px' }}>Fill in the details below to assign a new task to interns.</p>
             </div>
-            <main className="p-4 sm:p-6 lg:p-8">
-                <div className="max-w-5xl mx-auto">
-                    <form onSubmit={handleSubmit(onSubmit)} className="glass-container p-8 sm:p-10 md:p-12 space-y-10 rounded-3xl">
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
+            <main className="p-4 sm:p-6 lg:p-8" style={{ paddingLeft: '15%' }}>
+                <div className="max-w-7xl w-11/12 mx-auto">
+                    <form onSubmit={handleSubmit(onSubmit)} className="glass-container p-8 sm:p-12 md:p-16 rounded-3xl w-full" style={{ paddingBottom: '20px' }}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-8 items-stretch min-h-[500px]">
+                            <div className="flex flex-col gap-5">
                                 <label className="block text-lg font-semibold text-white/90 mb-3">Task Name</label>
                                 <input 
                                     {...register('taskName', { required: true })} 
@@ -154,7 +153,7 @@ export default function AllotTaskPage() {
                                     placeholder="e.g., Weekly Social Media Campaign"
                                 />
                             </div>
-                            <div>
+                            <div className="flex flex-col gap-5">
                                 <label className="block text-lg font-semibold text-white/90 mb-3">Domain</label>
                                 <select 
                                     {...register('domain')} 
@@ -166,30 +165,25 @@ export default function AllotTaskPage() {
                                     <option value="Social Media Management">Social Media Management</option>
                                 </select>
                             </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-lg font-semibold text-white/90 mb-3">Task Description</label>
-                            <textarea 
-                                {...register('description')} 
-                                rows={6} 
-                                className="w-full p-5 bg-black/20 border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none shadow-lg backdrop-blur-sm"
-                                placeholder="Provide a detailed description of the task requirements, objectives, and expected deliverables..."
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-lg font-semibold text-white/90 mb-3">Special Instructions <span className="text-white/50 font-normal">(Optional)</span></label>
-                            <textarea 
-                                {...register('instructions')} 
-                                rows={4} 
-                                className="w-full p-5 bg-black/20 border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none shadow-lg backdrop-blur-sm"
-                                placeholder="Any special instructions, tips, or additional notes for the interns..."
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
+                            <div className="flex flex-col gap-5">
+                                <label className="block text-lg font-semibold text-white/90 mb-3">Task Description</label>
+                                <textarea 
+                                    {...register('description')} 
+                                    rows={6} 
+                                    className="w-full p-5 bg-black/20 border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none shadow-lg backdrop-blur-sm"
+                                    placeholder="Provide a detailed description of the task requirements, objectives, and expected deliverables..."
+                                />
+                            </div>
+                            <div className="flex flex-col gap-5">
+                                <label className="block text-lg font-semibold text-white/90 mb-3">Special Instructions <span className="text-white/50 font-normal">(Optional)</span></label>
+                                <textarea 
+                                    {...register('instructions')} 
+                                    rows={4} 
+                                    className="w-full p-5 bg-black/20 border border-white/20 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none shadow-lg backdrop-blur-sm"
+                                    placeholder="Any special instructions, tips, or additional notes for the interns..."
+                                />
+                            </div>
+                            <div className="flex flex-col gap-5">
                                 <label className="block text-lg font-semibold text-white/90 mb-3">Relevant Links <span className="text-white/50 font-normal">(Comma-separated)</span></label>
                                 <input 
                                     {...register('links')} 
@@ -197,7 +191,7 @@ export default function AllotTaskPage() {
                                     placeholder="https://example.com, https://docs.example.com"
                                 />
                             </div>
-                            <div>
+                            <div className="flex flex-col gap-5">
                                 <label className="block text-lg font-semibold text-white/90 mb-3">Max Points</label>
                                 <select 
                                     {...register('maxPoints', { valueAsNumber: true })} 
@@ -212,7 +206,7 @@ export default function AllotTaskPage() {
 
                         <div>
                             <label className="block text-lg font-semibold text-white/90 mb-3">Attachments</label>
-                            <div className="relative w-full p-6 bg-black/20 border-2 border-dashed border-white/30 rounded-2xl text-center cursor-pointer hover:bg-black/30 transition-all shadow-lg backdrop-blur-sm">
+                            <div className="relative w-full p-10 bg-black/20 border-2 border-dashed border-white/30 rounded-2xl text-center cursor-pointer hover:bg-black/30 transition-all shadow-lg backdrop-blur-sm" style={{ paddingBottom: '20px' }}>
                                 <input 
                                     type="file" 
                                     multiple 
@@ -228,7 +222,7 @@ export default function AllotTaskPage() {
                             )}
                         </div>
                         
-                        <div>
+                        <div style={{ paddingBottom: '20px' }}>
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                                 <label className="text-xl font-semibold text-white">Assign To</label>
                                 <button 

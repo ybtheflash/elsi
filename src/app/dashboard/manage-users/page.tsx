@@ -121,9 +121,10 @@ export default function ManageUsersPage() {
                                                     value={u.role} 
                                                     onChange={(e) => handleRoleChange(u.uid, e.target.value as UserProfile['role'])}
                                                     className="p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all appearance-none"
-                                                >                                                        <option value="intern">Intern</option>
+                                                >
+                                                    <option value="intern" style={{padding: '10px'}}>Intern</option>
                                                     <option value="admin">Admin</option>
-                                                    <option value="super-admin">Super Admin</option>
+                                                    <option value="super-admin" style={{padding: '10px'}}>Super Admin</option>
                                                 </select>
                                             </td>
                                             <td className="px-6 py-5 text-gray-600">{u.domain?.join(', ') || 'N/A'}</td>

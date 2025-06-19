@@ -53,7 +53,7 @@ export default function Home() {
         </div>
       </main>      {/* Info Modal */}
       {showInfo && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center modal-overlay p-2 md:p-4" onClick={() => setShowInfo(false)} style={{ zIndex: 99999 }}>
+        <div className="fixed inset-0 flex items-center justify-center modal-overlay p-2 md:p-4" onClick={() => setShowInfo(false)} style={{ zIndex: 99999 }}>
           <div className="glass-card rounded-3xl p-5 md:p-8 max-w-lg md:max-w-2xl w-full max-h-[90vh] overflow-y-auto modal-content" onClick={e => e.stopPropagation()} style={{ zIndex: 100000 }}>
             <div className="flex justify-between items-center mb-3 md:mb-4">
               <h2 className="text-xl md:text-2xl font-bold text-purple-700 dark:text-purple-300">
