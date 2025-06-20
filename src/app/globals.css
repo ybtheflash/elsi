@@ -724,6 +724,32 @@ button, .pushable-button, .glass-card button, .glass-card .pushable-button {
   }
 }
 
+/* Modal overlay styles */
+.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  padding: 1.5rem;
+}
+
+.modal-content {
+  position: relative;
+  max-width: 32rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: 0 1rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+}
+
 @theme inline {
   --animate-shine: shine var(--duration) infinite linear;
   @keyframes shine {
@@ -746,4 +772,95 @@ button, .pushable-button, .glass-card button, .glass-card .pushable-button {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Sonner Toast Fixes - Only for top-center positioned toasts */
+/* Simple and effective approach */
+
+/* Fix z-index issues and positioning for top-center toasts only */
+[data-sonner-toaster][data-position*="top"] {
+  position: fixed !important;
+  top: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 999999 !important;
+  pointer-events: none !important;
+  width: auto !important;
+  max-width: 500px !important;
+}
+
+[data-sonner-toaster][data-position*="top"] [data-sonner-toast] {
+  pointer-events: auto !important;
+  z-index: 999999 !important;
+  position: relative !important;
+  margin-bottom: 8px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  /* Clean white background for all toasts */
+  background: rgba(255, 255, 255, 0.98) !important;
+  font-weight: 500 !important;
+}
+
+/* Override theme colors to prevent black text */
+[data-sonner-toaster][data-position*="top"][data-theme="light"] {
+  --normal-bg: rgba(255, 255, 255, 0.98) !important;
+  --normal-border: rgba(0, 0, 0, 0.1) !important;
+  --normal-text: #374151 !important;
+  --success-bg: rgba(255, 255, 255, 0.98) !important;
+  --success-border: rgba(16, 185, 129, 0.3) !important;
+  --success-text: #059669 !important;
+  --error-bg: rgba(255, 255, 255, 0.98) !important;
+  --error-border: rgba(239, 68, 68, 0.3) !important;
+  --error-text: #dc2626 !important;
+  --warning-bg: rgba(255, 255, 255, 0.98) !important;
+  --warning-border: rgba(245, 158, 11, 0.3) !important;
+  --warning-text: #d97706 !important;
+  --info-bg: rgba(255, 255, 255, 0.98) !important;
+  --info-border: rgba(139, 92, 246, 0.3) !important;
+  --info-text: #7c3aed !important;
+}
+
+/* Simple toast type styling with proper colors */
+[data-sonner-toaster][data-position*="top"] [data-sonner-toast][data-type="success"] {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: #059669 !important;
+}
+
+[data-sonner-toaster][data-position*="top"] [data-sonner-toast][data-type="error"] {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #dc2626 !important;
+}
+
+[data-sonner-toaster][data-position*="top"] [data-sonner-toast][data-type="warning"] {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #d97706 !important;
+}
+
+[data-sonner-toaster][data-position*="top"] [data-sonner-toast][data-type="loading"] {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  color: #2563eb !important;
+}
+
+[data-sonner-toaster][data-position*="top"] [data-sonner-toast][data-type="info"] {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  color: #7c3aed !important;
+}
+
+/* Default toast styling */
+[data-sonner-toaster][data-position*="top"] [data-sonner-toast]:not([data-type]) {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  color: #4f46e5 !important;
+}
+
+/* Toast text and icon styling - simple approach */
+[data-sonner-toaster][data-position*="top"] [data-sonner-toast] * {
+  color: inherit !important;
 }

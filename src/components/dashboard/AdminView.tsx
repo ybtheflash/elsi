@@ -6,7 +6,11 @@ import { db } from '@/lib/firebase';
 import { storage } from '@/lib/appwrite';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
-import { History, Link as LinkIcon } from 'lucide-react';
+import { History, Link as LinkIcon, Filter } from 'lucide-react';
+import { PaginationControls, usePagination } from '@/components/ui/pagination';
+import { SubmissionCard } from '@/components/ui/submission-card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 // Define types for our data structures
 type Submission = {
@@ -36,11 +40,46 @@ export default function AdminView() {
     const { user } = useAuth();
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [loading, setLoading] = useState(true);
+    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'revision_needed'>('all');
+    const [domainFilter, setDomainFilter] = useState<string>('all');
+    const [searchTerm, setSearchTerm] = useState('');
 
     // State for the logs modal
     const [viewingLogsFor, setViewingLogsFor] = useState<Submission | null>(null);
     const [currentLogs, setCurrentLogs] = useState<Log[]>([]);
     const [logsLoading, setLogsLoading] = useState(false);
+
+    // Get unique domains for filter
+    const domains = Array.from(new Set(submissions.map(s => s.domain).filter(Boolean)));
+
+    // Filter submissions based on status and domain
+    const filteredSubmissions = submissions.filter(submission => {
+        const matchesStatus = statusFilter === 'all' || submission.status === statusFilter;
+        const matchesDomain = domainFilter === 'all' || submission.domain === domainFilter;
+        return matchesStatus && matchesDomain;
+    });
+
+    // Use pagination hook
+    const {
+        currentPage,
+        setCurrentPage,
+        itemsPerPage,
+        setItemsPerPage,
+        isCompactView,
+        setIsCompactView,
+        showArchived,
+        setShowArchived,
+        paginatedItems,
+        totalPages,
+        totalItems,
+        archivedCount
+    } = usePagination(
+        filteredSubmissions,
+        searchTerm,
+        ['title', 'internName', 'domain', 'description'],
+        20, // Items per page
+        7   // Auto-archive after 7 days
+    );
 
     useEffect(() => {
         const q = query(collection(db, 'submissions'), orderBy('submittedAt', 'desc'));
@@ -161,104 +200,228 @@ export default function AdminView() {
                     <div className="h-8 bg-white/20 rounded-xl w-56 mx-auto mb-4"></div>
                     <div className="h-4 bg-white/20 rounded-lg w-40 mx-auto"></div>
                 </div>
+            </div>        );
+    }    return (
+        <div className="w-full space-y-8">
+            {/* Filters and Search */}
+            <div className="glass-container p-6 rounded-3xl">
+                <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+                    <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                        {/* Search */}
+                        <div className="flex-1">
+                            <input
+                                type="text"
+                                placeholder="Search submissions..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full p-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all backdrop-blur-sm"
+                            />
+                        </div>
+
+                        {/* Status Filter */}
+                        <select 
+                            value={statusFilter} 
+                            onChange={(e) => setStatusFilter(e.target.value as any)}
+                            className="p-3 bg-black/20 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all backdrop-blur-sm [color-scheme:dark]"
+                        >
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="revision_needed">Needs Revision</option>
+                        </select>
+
+                        {/* Domain Filter */}
+                        <select 
+                            value={domainFilter} 
+                            onChange={(e) => setDomainFilter(e.target.value)}
+                            className="p-3 bg-black/20 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all backdrop-blur-sm [color-scheme:dark]"
+                        >
+                            <option value="all">All Domains</option>
+                            {domains.map(domain => (
+                                <option key={domain} value={domain}>{domain}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* View Controls */}
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setIsCompactView(!isCompactView)}
+                            className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                                isCompactView 
+                                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-400/30' 
+                                    : 'bg-black/20 text-white/70 border border-white/20 hover:bg-black/30'
+                            }`}
+                        >
+                            Compact
+                        </button>
+                        <button
+                            onClick={() => setShowArchived(!showArchived)}
+                            className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                                showArchived 
+                                    ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-400/30' 
+                                    : 'bg-black/20 text-white/70 border border-white/20 hover:bg-black/30'
+                            }`}
+                        >
+                            Archived ({archivedCount})
+                        </button>
+                    </div>
+                </div>
             </div>
-        );
-    }return (
-        <div className="w-full glass-container p-8 rounded-3xl">
-            <div className="overflow-hidden rounded-2xl border border-white/20">
-                <div className="overflow-x-auto">
-                    <table className="min-w-full bg-black/20 backdrop-blur-xl">
-                        <thead className="bg-black/30">
-                            <tr>
-                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Intern</th>
-                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Details</th>
-                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Files & Links</th>
-                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Feedback</th>
-                                <th className="px-6 py-5 text-left text-sm font-semibold text-white/80 uppercase tracking-wider">Points</th>
-                                <th className="px-6 py-5 text-center text-sm font-semibold text-white/80 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/10">
-                            {submissions.map((sub) => (
-                                <tr key={sub.id} className="hover:bg-black/20 transition-colors">
-                                    <td className="px-6 py-5 align-top text-white font-medium whitespace-nowrap">{sub.internName}</td>
-                                    <td className="px-6 py-5 align-top max-w-xs">
-                                        <p className="font-bold text-white text-base">{sub.title}</p>
-                                        <p className="text-white/70 mt-1 text-sm">{sub.domain}</p>
-                                        {sub.description && (
-                                            <p className="text-white/60 text-sm mt-2 line-clamp-2">{sub.description}</p>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-5 align-top space-y-3">
-                                        {sub.fileDetails?.map(file => (
-                                            <a 
-                                                key={file.id} 
-                                                href={getFileUrl(file.id)} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer" 
-                                                className="flex items-center gap-3 text-blue-300 hover:text-blue-200 transition-colors text-sm font-medium"
+
+            {/* Results Summary */}
+            <div className="glass-container p-4 rounded-2xl">
+                <p className="text-white/80 text-center">
+                    Showing {paginatedItems.length} of {totalItems} submissions
+                    {searchTerm && ` matching "${searchTerm}"`}
+                    {archivedCount > 0 && !showArchived && ` (${archivedCount} archived)`}
+                </p>
+            </div>
+
+            {/* Submissions Cards */}
+            <div className="space-y-6">
+                {paginatedItems.length === 0 ? (
+                    <div className="text-center py-12 glass-container rounded-3xl">
+                        <div className="w-20 h-20 bg-white/10 rounded-3xl mx-auto mb-6 flex items-center justify-center">
+                            <Filter className="w-10 h-10 text-white/40" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-white mb-2">No submissions found</h3>
+                        <p className="text-white/60">
+                            {searchTerm ? 'Try adjusting your search terms or filters.' : 'No submissions have been made yet.'}
+                        </p>
+                    </div>
+                ) : (
+                    paginatedItems.map((sub) => (
+                        <div key={sub.id} className={`glass-container p-6 rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-300 ${
+                            isCompactView ? 'p-4' : 'p-6'
+                        }`}>
+                            <div className="flex flex-col xl:flex-row gap-6">
+                                {/* Main Content */}
+                                <div className="flex-1 space-y-4">
+                                    {/* Header */}
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-white">{sub.title}</h3>
+                                            <p className="text-white/70">by {sub.internName}</p>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <Badge 
+                                                variant={sub.status === 'approved' ? 'default' : sub.status === 'pending' ? 'secondary' : 'destructive'}
+                                                className="capitalize"
                                             >
-                                                <div className="w-2.5 h-2.5 bg-blue-400 rounded-full flex-shrink-0"></div>
-                                                <span className="truncate">{file.name}</span>
-                                            </a>
-                                        ))}
-                                        {sub.links?.map((link, i) => (
-                                            <a 
-                                                key={i} 
-                                                href={link} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer" 
-                                                className="flex items-center gap-3 text-emerald-300 hover:text-emerald-200 transition-colors text-sm font-medium"
-                                            >
-                                                <LinkIcon size={16} className="flex-shrink-0"/>
-                                                <span className="truncate">{link}</span>
-                                            </a>
-                                        ))}
-                                    </td>
-                                    <td className="px-6 py-5 align-top">
+                                                {sub.status.replace('_', ' ')}
+                                            </Badge>
+                                            <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-lg text-sm font-medium">
+                                                {sub.domain}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Description */}
+                                    {sub.description && !isCompactView && (
+                                        <p className="text-white/80">{sub.description}</p>
+                                    )}
+
+                                    {/* Files & Links */}
+                                    {(sub.fileDetails?.length || sub.links?.length) && !isCompactView && (
+                                        <div className="space-y-2">
+                                            {sub.fileDetails?.map(file => (
+                                                <a 
+                                                    key={file.id} 
+                                                    href={getFileUrl(file.id)} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer" 
+                                                    className="flex items-center gap-3 text-blue-300 hover:text-blue-200 transition-colors text-sm font-medium"
+                                                >
+                                                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                                    <span className="truncate">{file.name}</span>
+                                                </a>
+                                            ))}
+                                            {sub.links?.map((link, i) => (
+                                                <a 
+                                                    key={i} 
+                                                    href={link} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer" 
+                                                    className="flex items-center gap-3 text-emerald-300 hover:text-emerald-200 transition-colors text-sm font-medium"
+                                                >
+                                                    <LinkIcon size={14} />
+                                                    <span className="truncate">{link}</span>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Controls */}
+                                <div className="xl:w-80 space-y-4">
+                                    {/* Status */}
+                                    <div>
+                                        <label className="block text-white/70 text-sm font-medium mb-2">Status</label>
                                         <select 
                                             value={sub.status} 
                                             onChange={(e) => handleUpdateStatus(sub.id, e.target.value as Submission['status'])} 
-                                            className="p-3 bg-black/20 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-lg backdrop-blur-sm [color-scheme:dark]"
+                                            className="w-full p-3 bg-black/20 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all backdrop-blur-sm [color-scheme:dark]"
                                         >
                                             <option value="pending">Pending</option>
                                             <option value="approved">Approved</option>
                                             <option value="revision_needed">Needs Revision</option>
                                         </select>
-                                    </td>
-                                    <td className="px-6 py-5 align-top">
-                                        <textarea 
-                                            defaultValue={sub.feedback || ''} 
-                                            onBlur={(e) => handleUpdateFeedback(sub.id, e.target.value)} 
-                                            className="w-full p-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none shadow-lg backdrop-blur-sm"
-                                            rows={3}
-                                            placeholder="Add feedback..."
-                                        />
-                                    </td>
-                                    <td className="px-6 py-5 align-top">
+                                    </div>
+
+                                    {/* Points */}
+                                    <div>
+                                        <label className="block text-white/70 text-sm font-medium mb-2">Points</label>
                                         <input 
                                             type="number" 
                                             defaultValue={sub.points} 
                                             onBlur={(e) => handleUpdatePoints(sub.id, parseInt(e.target.value))} 
-                                            className="w-24 text-center p-3 bg-black/20 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-lg backdrop-blur-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            className="w-full p-3 bg-black/20 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all backdrop-blur-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                             min="0"
                                         />
-                                    </td>
-                                    <td className="px-6 py-5 text-center align-top">
-                                        <button 
-                                            onClick={() => handleViewLogs(sub)} 
-                                            className="flex items-center gap-2 mx-auto px-4 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 text-purple-200 rounded-xl font-medium transition-all duration-200 hover:scale-105 text-sm backdrop-blur-sm"
-                                        >
-                                            <History size={16} /> View Logs
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>            {/* Logs Modal */}
+                                    </div>
+
+                                    {/* Feedback */}
+                                    {!isCompactView && (
+                                        <div>
+                                            <label className="block text-white/70 text-sm font-medium mb-2">Feedback</label>
+                                            <textarea 
+                                                defaultValue={sub.feedback || ''} 
+                                                onBlur={(e) => handleUpdateFeedback(sub.id, e.target.value)} 
+                                                className="w-full p-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none backdrop-blur-sm"
+                                                rows={3}
+                                                placeholder="Add feedback..."
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Actions */}
+                                    <button 
+                                        onClick={() => handleViewLogs(sub)} 
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/30 text-purple-200 rounded-xl font-medium transition-all duration-200 hover:scale-105 backdrop-blur-sm"
+                                    >
+                                        <History size={16} /> View Logs
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>            {/* Pagination */}
+            {totalPages > 1 && (
+                <PaginationControls
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    itemsPerPage={itemsPerPage}
+                    onItemsPerPageChange={setItemsPerPage}
+                    totalItems={totalItems}
+                    isCompactView={isCompactView}
+                    onToggleView={() => setIsCompactView(!isCompactView)}
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                />
+            )}{/* Logs Modal */}
             {viewingLogsFor && (
                 <div 
                     className="fixed inset-0 bg-black/70 backdrop-blur-lg flex items-center justify-center z-50 p-6"

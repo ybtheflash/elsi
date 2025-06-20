@@ -5,7 +5,7 @@ import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/dashboard/Header';
 import { useRouter } from 'next/navigation';
-import { toast, Toaster } from 'sonner';
+import { toast } from 'sonner';
 import { Loader2, ShieldCheck } from 'lucide-react';
 
 type UserProfile = {
@@ -79,19 +79,8 @@ export default function ManageUsersPage() {
                 </main>
             </div>
         );
-    }
-      return (
+    }      return (
         <div className="min-h-screen flex flex-col">
-            <Toaster 
-                richColors 
-                position="top-center" 
-                toastOptions={{ 
-                    style: { 
-                        zIndex: 99999,
-                        marginTop: '100px'
-                    } 
-                }} 
-            />
             <Header title="Manage Users" />
             <div className="text-center py-8 px-4">
                 <h2 className="text-4xl font-bold text-white mb-3">User Administration</h2>

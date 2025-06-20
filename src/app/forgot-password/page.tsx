@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Toaster, toast } from 'sonner';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
 
@@ -59,7 +59,6 @@ export default function ForgotPasswordPage() {
     }
   };  return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-8">
-      <Toaster richColors position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
       
       {/* Heading outside the form */}
       <div className="text-center space-y-3">

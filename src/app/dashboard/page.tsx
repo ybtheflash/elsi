@@ -4,16 +4,15 @@ import { useAuth } from '@/context/AuthContext';
 import Header from '@/components/dashboard/Header';
 import SubmissionForm from '@/components/dashboard/SubmissionForm'; 
 import AdminView from '@/components/dashboard/AdminView';       
-import { Toaster } from 'sonner';
+import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
-
   // Show a loading state while we verify the user's role
   if (loading) {
     return (
-        <div className="min-h-screen flex flex-col">
+        <>
             <Header title="Dashboard" />
             <main className="flex-grow flex items-center justify-center p-4 sm:p-8">
               <div className="w-full max-w-md text-center">
@@ -24,22 +23,12 @@ export default function DashboardPage() {
                 </div>
               </div>
             </main>
-        </div>
+        </>
     );
   }
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <Toaster 
-        richColors 
-        position="top-center" 
-        toastOptions={{ 
-          style: { 
-            zIndex: 99999,
-            marginTop: '100px'
-          } 
-        }} 
-      />        {/* Logic to display the correct component based on user role */}
+    <>
+        {/* Logic to display the correct component based on user role */}
       {user?.role === 'intern' && (
         <>
             <Header title="Submit Your Work" />
@@ -68,7 +57,7 @@ export default function DashboardPage() {
         </>
       )}{/* Fallback for users with no role or unexpected roles */}
       {!user?.role && !loading && (
-          <div className="min-h-screen flex flex-col">
+            <>
             <Header title="Dashboard" />
             <main className="flex-grow flex items-center justify-center p-4 sm:p-8">
               <div className="w-full max-w-md text-center">
@@ -83,8 +72,8 @@ export default function DashboardPage() {
                 </div>
               </div>
             </main>
-          </div>
+            </>
       )}
-    </div>
+    </>
   );
 }

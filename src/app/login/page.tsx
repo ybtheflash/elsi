@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { Toaster, toast } from 'sonner';
+import { toast } from 'sonner';
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -26,19 +26,60 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);  const { register, handleSubmit, formState: { errors } } = useForm({
+  const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm({
     resolver: zodResolver(loginSchema)
   });
 
+  // Load saved email from cookies on component mount
+  useEffect(() => {
+    const savedEmail = getCookie('rememberedEmail');
+    if (savedEmail) {
+      setValue('email', savedEmail);
+      setRememberMe(true);
+    }
+  }, [setValue]);
+
+  // Cookie helper functions
+  const setCookie = (name: string, value: string, days: number = 30) => {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+  };
+
+  const getCookie = (name: string): string | null => {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  };
+
+  const deleteCookie = (name: string) => {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+  };
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     setLoading(true);
     const loadingToast = toast.loading('Signing in...');
     
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
+      
+      // Handle remember me functionality
+      if (rememberMe) {
+        setCookie('rememberedEmail', data.email, 30); // Save for 30 days
+      } else {
+        deleteCookie('rememberedEmail'); // Remove saved email if unchecked
+      }
+      
       toast.dismiss(loadingToast);
       toast.success('Signed in successfully! Redirecting...');
-      router.push('/dashboard');    } catch (error: any) {
+      router.push('/dashboard');} catch (error: any) {
       toast.dismiss(loadingToast);
       
       // Handle specific Firebase auth errors with user-friendly messages
@@ -82,11 +123,8 @@ export default function LoginPage() {
           <ArrowLeft className="w-4 h-4" />
           Back
         </Link>
-      </div>
-
-      {/* Main content container */}
+      </div>      {/* Main content container */}
       <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-8">
-        <Toaster richColors toastOptions={{ style: { zIndex: 9999 } }} />
         
         {/* Heading outside the form */}
         <div className="text-center space-y-3">
@@ -125,7 +163,20 @@ export default function LoginPage() {
                     {...register('password')}                  />
                   {errors.password && (
                     <p className="text-red-400 text-sm mt-1">{errors.password.message as string}</p>
-                  )}
+                  )}                </div>
+                
+                {/* Remember me checkbox */}
+                <div className="flex items-center space-x-3">
+                  <input
+                    id="rememberMe"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 text-purple-600 bg-white/90 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm font-medium text-white/90 cursor-pointer">
+                    Remember me
+                  </Label>
                 </div>
                 
                 {/* Forgot password link */}
