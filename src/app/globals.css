@@ -1,25 +1,11 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap");
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-
-@theme {
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-display: "Nunito", system-ui, sans-serif;
-
-  /* Custom colors for glass/lilac theme */
-  --color-lilac-50: #faf7ff;
-  --color-lilac-100: #f3ebff;
-  --color-lilac-200: #e6d6ff;
-  --color-lilac-300: #d4b8ff;
-  --color-lilac-400: #be94ff;
-  --color-lilac-500: #a970ff;
-  --color-lilac-600: #9550ff;
-  --color-lilac-700: #8b3fff;
-  --color-lilac-800: #7b2fff;
-  --color-lilac-900: #6d1fff;
-}
 
 /* Base styles */
 * {
@@ -484,53 +470,47 @@ button, .pushable-button, .glass-card button, .glass-card .pushable-button {
   }
 }
 
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --animate-shine: shine var(--duration) infinite linear;
-  @keyframes shine {
+/* Custom CSS variables for theming */
+:root {
+  --radius: 0.5rem;
+
+  /* Light mode colors */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+}
+
+/* Keyframes for shine animation */
+@keyframes shine {
   0% {
     background-position: 0% 0%;
-    }
+  }
   50% {
     background-position: 100% 100%;
-    }
+  }
   100% {
     background-position: 0% 0%;
-    }
   }
 }
 
@@ -570,10 +550,31 @@ button, .pushable-button, .glass-card button, .glass-card .pushable-button {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    font-family: Inter, system-ui, sans-serif;
+    line-height: 1.6;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  /* Glass morphism utility */
+  .glass-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .glass-container-2 {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -670,12 +671,12 @@ button, .pushable-button, .glass-card button, .glass-card .pushable-button {
   .mobile-nav {
     gap: 0.5rem;
   }
-  
+
   .mobile-nav a {
     min-width: auto;
     padding: 0.5rem;
   }
-  
+
   .mobile-nav span {
     display: none;
   }
@@ -712,13 +713,37 @@ button, .pushable-button, .glass-card button, .glass-card .pushable-button {
     padding: 1.5rem;
     margin: 0.5rem;
   }
-  
+
   .glass-card .space-y-8 > * + * {
     margin-top: 1.5rem;
   }
-  
+
   /* Ensure touch targets are large enough on mobile */
   button, input, select, textarea {
     min-height: 44px;
+  }
+}
+
+@theme inline {
+  --animate-shine: shine var(--duration) infinite linear;
+  @keyframes shine {
+  0% {
+    background-position: 0% 0%;
+    }
+  50% {
+    background-position: 100% 100%;
+    }
+  to {
+    background-position: 0% 0%;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }

@@ -57,45 +57,53 @@ export default function ForgotPasswordPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/wallpaper.jpg')" }}>
+  };  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-8">
       <Toaster richColors position="top-center" toastOptions={{ style: { zIndex: 9999 } }} />
-      <div className="w-full max-w-md p-10 bg-black/10 rounded-2xl shadow-2xl border border-lilac-200 backdrop-blur-md flex flex-col gap-8" style={{ padding: '24px' }}>
+      
+      {/* Heading outside the form */}
+      <div className="text-center space-y-3">
+        <h1 className="text-3xl md:text-4xl font-bold text-white">
+          ELSI 2025 Portal
+        </h1>
+        <p className="text-lg text-white/80">
+          Reset your password to continue
+        </p>
+      </div>
+      
+      <div className="max-w-sm glass-card p-8 flex flex-col gap-6">
         <div className="text-center flex flex-col gap-3">
             <div className="flex items-center justify-center mb-2">
-              <span className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-lilac-100 shadow-lg">
-                <Mail className="h-10 w-10 text-lilac-500" />
+              <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 shadow-lg">
+                <Mail className="h-6 w-6 text-purple-600" />
               </span>
             </div>
-            <h2 className="text-3xl font-extrabold text-lilac-200">Forgot Your Password?</h2>
-            <p className="text-base text-lilac-200">
-                No problem. Enter your email address below and we'll send you a link to reset it.
-            </p>
-        </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+            <h2 className="text-xl font-bold text-gray-800">Forgot Your Password?</h2>
+            <p className="text-sm text-gray-600">
+                Enter your email address and we'll send you a link to reset it.
+            </p>        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <label htmlFor="email" className="block text-sm font-medium text-lilac-200">Email address</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-800">Email address</label>
             <input 
               id="email"
               type="email" 
               placeholder="Enter your email address"
               {...register('email')} 
-              className="w-full px-4 py-3 border-2 border-lilac-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-lilac-400 focus:border-lilac-400 bg-lilac-50 text-lilac-900 placeholder-lilac-400 transition-all"
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 bg-gray-50 text-gray-800 placeholder-gray-400 transition-all"
             />
             {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message as string}</p>}
           </div>
           <button 
             type="submit" 
             disabled={loading} 
-            className="w-full py-3 font-bold text-white bg-gradient-to-r from-lilac-500 to-lilac-600 rounded-lg disabled:bg-lilac-300 hover:from-lilac-600 hover:to-lilac-200 transition-all shadow-lilac-200/40"
+            className="w-full py-2.5 font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg disabled:bg-gray-400 hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
           >
             {loading ? 'Sending...' : 'Send Reset Link'}
           </button>
         </form>
-        <div className="text-center pt-2" style={{ paddingBottom: '20px' }}>
-            <Link href="/login" className="text-sm font-semibold text-lilac-600 hover:underline transition-colors">
+        <div className="text-center">
+            <Link href="/login" className="text-sm font-medium text-purple-600 hover:text-purple-700 hover:underline transition-colors">
                 Back to Login
             </Link>
         </div>

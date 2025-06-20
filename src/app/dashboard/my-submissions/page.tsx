@@ -171,9 +171,13 @@ export default function MySubmissionsPage() {
         return (
             <div className="min-h-screen flex flex-col">
                 <Header title="My Submissions" />
+                <div className="text-center py-8 px-4">
+                    <h2 className="text-4xl font-bold text-white mb-3">My Submissions</h2>
+                    <p className="text-white/80 text-lg">Track, edit, and view feedback on your work.</p>
+                </div>
                 <main className="flex-grow flex items-center justify-center p-4 sm:p-8">
                     <div className="w-full max-w-md mx-auto text-center">
-                        <div className="glass-card">
+                        <div className="glass-card p-16">
                             <Loader2 className="w-12 h-12 animate-spin mx-auto mb-6 text-indigo-600" />
                             <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Submissions</h3>
                             <p className="text-gray-600">Fetching your submission history...</p>
@@ -182,7 +186,7 @@ export default function MySubmissionsPage() {
                 </main>
             </div>
         );
-    }    return (
+    }return (
         <div className="min-h-screen flex flex-col">
             <Toaster 
                 richColors 
@@ -200,21 +204,19 @@ export default function MySubmissionsPage() {
                 <p className="text-white/80 text-lg">Track, edit, and view feedback on your work.</p>
             </div>
             <main className="flex-grow p-4 sm:p-8">
-                <div className="w-full max-w-6xl mx-auto">
-                    {submissions.length === 0 ? (
+                <div className="w-full max-w-6xl mx-auto">                    {submissions.length === 0 ? (
                         <div className="max-w-lg mx-auto text-center">
                             <div className="glass-card p-16">
-                                <div className="w-24 h-24 bg-white/10 rounded-3xl mx-auto mb-8 flex items-center justify-center">
-                                    <FileText className="w-12 h-12 text-white/80" />
+                                <div className="w-24 h-24 bg-indigo-100 rounded-3xl mx-auto mb-8 flex items-center justify-center">
+                                    <FileText className="w-12 h-12 text-indigo-600" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-4">No Submissions Yet</h3>
-                                <p className="text-white/80 text-lg">You haven't made any submissions yet. Check your tasks to get started!</p>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">No Submissions Yet</h3>
+                                <p className="text-gray-600 text-lg">You haven't made any submissions yet. Check your tasks to get started!</p>
                             </div>
                         </div>
-                    ) : (
-                        <div className="space-y-8">
+                    ) : (<div className="space-y-8">
                             {submissions.map(sub => (
-                                <div key={sub.id} className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 border border-white/20 hover:shadow-3xl transition-all duration-300">
+                                <div key={sub.id} className="glass-card glass-card-hover transition-all duration-300 p-8">
                                     <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-6">
                                         <div className="flex-1">
                                             <h3 className="text-2xl font-bold text-gray-800 mb-3">{sub.title}</h3>
@@ -244,7 +246,7 @@ export default function MySubmissionsPage() {
 
                                     {sub.description && (
                                         <div className="mb-6">
-                                            <p className="text-gray-700 leading-relaxed text-lg">{sub.description}</p>
+                                            <p className="text-gray-600 leading-relaxed text-lg">{sub.description}</p>
                                         </div>
                                     )}
                                     

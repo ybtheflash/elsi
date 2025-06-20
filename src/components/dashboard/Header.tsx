@@ -51,7 +51,7 @@ export default function Header({ title }: HeaderProps) {
     return (
         <header className="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b border-white/10">
             <div className="px-8 py-6">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex justify-between items-center">
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-4">
                             <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-lg">

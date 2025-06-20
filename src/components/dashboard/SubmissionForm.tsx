@@ -80,70 +80,69 @@ export default function SubmissionForm() {
       setLoading(false);
     }
   };  return (
-    <div className="flex flex-col items-center w-full min-h-[70vh] py-12 px-4 md:px-8" style={{ padding: '10px' }}>
+    <div className="flex flex-col items-center w-full min-h-[70vh] px-4 md:px-8">
       {taskName && (
-        <div className="mb-8 p-6 bg-blue-50 border-l-4 border-blue-400 rounded-r-lg shadow-sm w-full max-w-4xl">
+        <div className="mb-8 p-6 glass-card border-l-4 border-blue-400 rounded-r-lg w-full max-w-4xl">
           <p className="text-blue-600 text-sm font-medium mb-1">Submitting for task:</p>
-          <p className="font-bold text-blue-900 text-xl">{taskName}</p>
+          <p className="font-bold text-gray-800 text-xl">{taskName}</p>
         </div>
       )}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-4xl grid grid-cols-1 gap-10 bg-white/80 rounded-2xl shadow-xl border border-gray-200 p-12 md:p-16 lg:p-20" style={{ padding: '10px' }}
+        className="w-full max-w-4xl grid grid-cols-1 gap-10 glass-card p-12 md:p-16 lg:p-20"
       >
         <div>
-          <Label htmlFor="title">Submission Title <span className="text-destructive">*</span></Label>
+          <Label htmlFor="title" className="text-gray-800 font-semibold">Submission Title <span className="text-red-600">*</span></Label>
           <Input
             id="title"
             {...register('title', { required: true })}
             placeholder="e.g., Weekly Progress Report - UI Design"
-            className="mt-4"
-          />
-        </div>
+            className="mt-4 border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-500 focus:border-blue-400 focus:ring-blue-400"
+          />        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <Label htmlFor="domain">Select Your Domain <span className="text-destructive">*</span></Label>
+            <Label htmlFor="domain" className="text-gray-800 font-semibold">Select Your Domain <span className="text-red-600">*</span></Label>
             <select
               id="domain"
               {...register('domain', { required: true })}
-              className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="mt-2 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
             >
               <option value="">Choose your domain</option>
               {user?.domain?.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
           <div>
-            <Label htmlFor="week">Week Ending On <span className="text-destructive">*</span></Label>
+            <Label htmlFor="week" className="text-gray-800 font-semibold">Week Ending On <span className="text-red-600">*</span></Label>
             <Input
               id="week"
               type="date"
               {...register('week', { required: true })}
-              className="mt-2"
+              className="mt-2 border-gray-200 bg-gray-50 text-gray-800 focus:border-blue-400 focus:ring-blue-400"
             />
           </div>
         </div>
         <div>
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description" className="text-gray-800 font-semibold">Description</Label>
           <Textarea
             id="description"
             {...register('description')}
             rows={5}
             placeholder="Describe your work, methodology, achievements, and any challenges you encountered..."
-            className="mt-2"
+            className="mt-2 border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-500 focus:border-blue-400 focus:ring-blue-400"
           />
         </div>
         <div>
-          <Label htmlFor="links">Relevant Links <span className="text-xs text-muted-foreground">(comma-separated)</span></Label>
+          <Label htmlFor="links" className="text-gray-800 font-semibold">Relevant Links <span className="text-xs text-gray-500">(comma-separated)</span></Label>
           <Input
             id="links"
             {...register('links')}
             placeholder="https://github.com/yourproject, https://figma.com/design, https://demo.yoursite.com"
-            className="mt-2"
+            className="mt-2 border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-500 focus:border-blue-400 focus:ring-blue-400"
           />
         </div>
         <div>
-          <Label>Attach Files</Label>
-          <div className="mt-2 border-2 border-dashed border-muted rounded-lg p-8 text-center relative">
+          <Label className="text-gray-800 font-semibold">Attach Files</Label>
+          <div className="mt-2 border-2 border-dashed border-gray-300 bg-gray-50 rounded-lg p-8 text-center relative hover:border-blue-400 transition-colors">
             <input
               type="file"
               multiple
@@ -151,17 +150,17 @@ export default function SubmissionForm() {
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
             <div className="flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-muted-foreground text-sm">Drag & drop files here, or click to select</span>
-              <span className="text-xs text-muted-foreground mt-1">Support for multiple file types</span>
+              <span className="text-gray-600 text-sm">Drag & drop files here, or click to select</span>
+              <span className="text-xs text-gray-500 mt-1">Support for multiple file types</span>
             </div>
           </div>
           {files.length > 0 && (
-            <div className="mt-2 text-xs text-muted-foreground">
+            <div className="mt-2 text-xs text-gray-600">
               {files.length} file(s) selected: {files.map(f => f.name).join(', ')}
             </div>
           )}
         </div>
-        <Button type="submit" disabled={loading} className="w-full text-base font-semibold py-4">
+        <Button type="submit" disabled={loading} className="w-full text-base font-semibold py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0">
           {loading ? 'Submitting...' : 'Submit Task'}
         </Button>
       </form>

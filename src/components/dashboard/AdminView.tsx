@@ -163,7 +163,7 @@ export default function AdminView() {
                 </div>
             </div>
         );
-    }    return (
+    }return (
         <div className="w-full glass-container p-8 rounded-3xl">
             <div className="overflow-hidden rounded-2xl border border-white/20">
                 <div className="overflow-x-auto">

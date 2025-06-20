@@ -80,7 +80,8 @@ export default function LoginPage() {
           className="btn-main flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back        </Link>
+          Back
+        </Link>
       </div>
 
       {/* Main content container */}
@@ -97,33 +98,30 @@ export default function LoginPage() {
           </p>
         </div>
         
-        <Card className="relative overflow-hidden max-w-[450px] w-full bg-transparent border-0">
-          <ShineBorder shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
+        <Card className="relative overflow-hidden max-w-[450px] w-full bg-black/30 border-0">
+          <ShineBorder shineColor={["#a970ff", "#be94ff", "#d4b8ff"]} />
           
-          <CardContent className="p-10" style={{ padding: '20px' }}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-              <div className="space-y-6">
-                <div className="space-y-3" style={{ paddingBottom: '20px' }}>
-                  <Label htmlFor="email" className="text-sm font-medium text-white" style={{ paddingBottom: '5px' }}>Email</Label>
+          <CardContent className="p-10">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">              <div className="space-y-6">                <div className="space-y-3">
+                  <Label htmlFor="email" className="text-sm font-medium text-white">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     placeholder="name@example.com"
-                    className="h-14 px-6 text-base rounded-xl bg-white/90 backdrop-blur border-white/20 focus:border-purple-400 focus:ring-purple-400 placeholder:text-gray-500" style={{ paddingLeft: '10px' }}
+                    className="h-14 px-6 text-base rounded-xl bg-white/95 backdrop-blur border-gray-200 focus:border-purple-400 focus:ring-purple-400/20 placeholder:text-gray-400 text-gray-100"
                     {...register('email')}
                   />
                   {errors.email && (
                     <p className="text-red-400 text-sm mt-1">{errors.email.message as string}</p>
                   )}
                 </div>
-                
-                <div className="space-y-3" style={{ paddingBottom: '20px' }}>
-                  <Label htmlFor="password" className="text-sm font-medium text-white" style={{ paddingBottom: '5px' }}>Password</Label>
+                  <div className="space-y-3">
+                  <Label htmlFor="password" className="text-sm font-medium text-white">Password</Label>
                   <Input
                     id="password"
                     type="password"
                     placeholder="Enter your password"
-                    className="h-14 px-6 text-base rounded-xl bg-white/90 backdrop-blur border-white/20 focus:border-purple-400 focus:ring-purple-400 placeholder:text-gray-500" style={{ paddingLeft: '10px' }}
+                    className="h-14 px-6 text-base rounded-xl bg-white/95 backdrop-blur border-gray-200 focus:border-purple-400 focus:ring-purple-400/20 placeholder:text-gray-400 text-gray-100"
                     {...register('password')}                  />
                   {errors.password && (
                     <p className="text-red-400 text-sm mt-1">{errors.password.message as string}</p>
@@ -131,7 +129,7 @@ export default function LoginPage() {
                 </div>
                 
                 {/* Forgot password link */}
-                <div className="text-right" style={{ paddingBottom: '20px' }}>
+                <div className="text-right">
                   <Link href="/forgot-password" className="text-sm font-medium text-white/80 hover:text-white transition-colors">
                     Forgot password?
                   </Link>

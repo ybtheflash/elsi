@@ -137,13 +137,12 @@ export default function AllotTaskPage() {
                 }} 
             />
             <Header title="Allot New Task" />
-            <div className="text-center py-8 px-4">
-                <h2 className="text-4xl font-bold text-white mb-3" style={{ paddingTop: '20px' }}>Create New Task</h2>
-                <p className="text-white/80 text-lg" style={{ paddingBottom: '20px' }}>Fill in the details below to assign a new task to interns.</p>
+            <div className="text-center py-8 px-4">                <h2 className="text-4xl font-bold text-white mb-3">Create New Task</h2>
+                <p className="text-white/80 text-lg">Fill in the details below to assign a new task to interns.</p>
             </div>
-            <main className="p-4 sm:p-6 lg:p-8" style={{ paddingLeft: '15%' }}>
+            <main className="p-4 sm:p-6 lg:p-8">
                 <div className="max-w-7xl w-11/12 mx-auto">
-                    <form onSubmit={handleSubmit(onSubmit)} className="glass-container p-8 sm:p-12 md:p-16 rounded-3xl w-full" style={{ paddingBottom: '20px' }}>
+                    <form onSubmit={handleSubmit(onSubmit)} className="glass-container p-8 sm:p-12 md:p-16 rounded-3xl w-full">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-8 items-stretch min-h-[500px]">
                             <div className="flex flex-col gap-5">
                                 <label className="block text-lg font-semibold text-white/90 mb-3">Task Name</label>
@@ -206,7 +205,7 @@ export default function AllotTaskPage() {
 
                         <div>
                             <label className="block text-lg font-semibold text-white/90 mb-3">Attachments</label>
-                            <div className="relative w-full p-10 bg-black/20 border-2 border-dashed border-white/30 rounded-2xl text-center cursor-pointer hover:bg-black/30 transition-all shadow-lg backdrop-blur-sm" style={{ paddingBottom: '20px' }}>
+                            <div className="relative w-full p-10 bg-black/20 border-2 border-dashed border-white/30 rounded-2xl text-center cursor-pointer hover:bg-black/30 transition-all shadow-lg backdrop-blur-sm">
                                 <input 
                                     type="file" 
                                     multiple 
@@ -222,7 +221,7 @@ export default function AllotTaskPage() {
                             )}
                         </div>
                         
-                        <div style={{ paddingBottom: '20px' }}>
+                        <div>
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                                 <label className="text-xl font-semibold text-white">Assign To</label>
                                 <button 
