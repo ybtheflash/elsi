@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLoading } from '@/context/LoadingContext';
 import Header from '@/components/dashboard/Header';
 import { db, auth } from '@/lib/firebase';
 import { collection, query, getDocs, doc, updateDoc, where, collectionGroup } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { Edit, Trash2, Loader2, Users, X, Filter, CheckCircle, Clock } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { PaginationControls, usePagination } from '@/components/ui/pagination';
+import { usePagination } from '@/components/ui/pagination';
 
 type Task = {
     id: string;
@@ -35,7 +36,8 @@ type User = {
 type FormData = Omit<Task, 'id' | 'submissionCount' | 'assignedTo'> & { links: string };
 
 export default function ViewTasksPage() {
-    const { user } = useAuth();    const [tasks, setTasks] = useState<Task[]>([]);
+    const { user } = useAuth();
+    const { setLoading: setGlobalLoading } = useLoading();const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
     const [viewingAssignees, setViewingAssignees] = useState<Task | null>(null);
@@ -96,18 +98,16 @@ export default function ViewTasksPage() {
     });
 
     // Use pagination hook
-    const {
-        currentPage,
+    const {        currentPage,
         setCurrentPage,
         itemsPerPage,
         setItemsPerPage,
-        isCompactView,
-        setIsCompactView,
         showArchived,
         setShowArchived,
         paginatedItems,
         totalPages,
-        totalItems,        archivedCount
+        totalItems,
+        archivedCount
     } = usePagination(
         filteredTasks,
         '', // We handle search filtering manually above
@@ -167,9 +167,7 @@ export default function ViewTasksPage() {
             description: "All tasks have been filtered out. Try adjusting your search or filter criteria.",
             icon: Filter
         };
-    };
-
-    const fetchTasksAndSubmissions = useCallback(async () => {
+    };    const fetchTasksAndSubmissions = useCallback(async () => {
         setLoading(true);
         try {
             // Fetch all tasks
@@ -201,8 +199,10 @@ export default function ViewTasksPage() {
             setTasks([]); // Set empty array as fallback
         } finally {
             setLoading(false);
+            // Turn off global loading when this page is ready
+            setGlobalLoading(false);
         }
-    }, []);
+    }, [setGlobalLoading]);
 
     useEffect(() => {
         fetchTasksAndSubmissions();
@@ -324,8 +324,38 @@ export default function ViewTasksPage() {
                 <h2 className="text-4xl font-bold text-white mb-3">Manage Allotted Tasks</h2>
                 <p className="text-white/80 text-lg">View, edit, or delete existing tasks.</p>
             </div>            <main className="flex-grow p-4 sm:p-8">
-                    <div className="w-full max-w-6xl mx-auto">                    {/* Filters */}
+                    <div className="w-full max-w-6xl mx-auto">                    {/* Filters and Controls */}
                     <div className="glass-container p-6 rounded-3xl mb-8">
+                        {/* Top Row: Search and View Controls */}
+                        <div className="flex flex-col lg:flex-row gap-4 mb-4">
+                            {/* Search Bar */}
+                            <div className="flex-1 max-w-md">
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Search tasks..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full pl-4 pr-4 py-3 bg-black/20 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all backdrop-blur-sm"
+                                    />
+                                </div>
+                            </div>
+                              {/* Items Per Page Control */}
+                            <div className="flex items-center gap-3">
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                                    className="px-3 py-2 rounded-xl bg-black/20 border border-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 [color-scheme:dark]"
+                                >
+                                    <option value={10}>10 per page</option>
+                                    <option value={20}>20 per page</option>
+                                    <option value={50}>50 per page</option>
+                                    <option value={100}>100 per page</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        {/* Bottom Row: Filters and Pagination */}
                         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                             <div className="flex flex-col sm:flex-row gap-4 flex-1">
                                 {/* Domain Filter */}
@@ -349,17 +379,49 @@ export default function ViewTasksPage() {
                                     <option value="all">All Status</option>
                                     <option value="overdue">Overdue</option>
                                     <option value="urgent">Due Soon</option>
-                                    <option value="normal">Normal</option>                                </select>
+                                    <option value="normal">Normal</option>
+                                </select>
+                                
+                                {/* Results Summary */}
+                                <div className="flex items-center px-4 py-3 bg-black/10 border border-white/10 rounded-xl">
+                                    <span className="text-white/80 text-sm whitespace-nowrap">
+                                        {paginatedItems.length} of {totalItems} tasks
+                                    </span>
+                                </div>
                             </div>
+                              {/* Compact Pagination */}
+                            {totalItems > 0 && (
+                                <div className="flex items-center gap-2">
+                                    {totalPages > 1 ? (
+                                        <>
+                                            <button
+                                                onClick={() => setCurrentPage(currentPage - 1)}
+                                                disabled={currentPage === 1}
+                                                className="px-3 py-2 bg-black/20 border border-white/20 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/30 transition-all"
+                                            >
+                                                ←
+                                            </button>
+                                            
+                                            <span className="px-3 py-2 bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 rounded-xl text-sm font-medium">
+                                                {currentPage} / {totalPages}
+                                            </span>
+                                            
+                                            <button
+                                                onClick={() => setCurrentPage(currentPage + 1)}
+                                                disabled={currentPage === totalPages}
+                                                className="px-3 py-2 bg-black/20 border border-white/20 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/30 transition-all"
+                                            >
+                                                →
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <span className="px-3 py-2 bg-black/10 border border-white/10 text-white/60 rounded-xl text-sm">
+                                            Page 1 of 1
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                         </div>
-                    </div>
-
-                    {/* Results Summary */}
-                    <div className="glass-container p-4 rounded-2xl mb-8">
-                        <p className="text-white/80 text-center">
-                            Showing {paginatedItems.length} of {totalItems} tasks
-                            {searchTerm && ` matching "${searchTerm}"`}
-                        </p>
                     </div>                    {paginatedItems.length === 0 ? (
                         <div className="max-w-lg mx-auto text-center">
                             <div className="glass-card p-16">
@@ -377,69 +439,8 @@ export default function ViewTasksPage() {
                                     );
                                 })()}
                             </div>
-                        </div>) : (
-                        <div className={isCompactView ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-8"}>
-                            {paginatedItems.map(task => isCompactView ? (
-                                // Compact View
-                                <div key={task.id} className="glass-card glass-card-hover transition-all duration-300 p-6">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <h3 className="text-lg font-bold text-gray-800 line-clamp-2 flex-1 mr-2">
-                                            {task.taskName}
-                                        </h3>
-                                        <div className="flex gap-2 flex-shrink-0">
-                                            <button 
-                                                onClick={() => openEditModal(task)} 
-                                                className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-200"
-                                            >
-                                                <Edit size={16} />
-                                            </button>
-                                            <button 
-                                                onClick={() => handleDeleteTask(task.id)} 
-                                                className="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all duration-200"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="space-y-3">
-                                        <div className="flex flex-wrap gap-2">
-                                            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
-                                                {task.domain}
-                                            </span>
-                                            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-sm font-semibold">
-                                                {task.maxPoints}pt
-                                            </span>
-                                        </div>
-                                        
-                                        {task.dueDate && (() => {
-                                            const dueDateStatus = getDueDateStatus(task.dueDate);
-                                            return (
-                                                <span className={`inline-block px-3 py-1 rounded-lg text-sm font-medium ${dueDateStatus.className}`}>
-                                                    {dueDateStatus.text}
-                                                </span>
-                                            );
-                                        })()}
-                                        
-                                        <div className="flex justify-between items-center">
-                                            <div className="text-center">
-                                                <div className="text-2xl font-bold text-indigo-600">
-                                                    {task.submissionCount || 0}
-                                                </div>
-                                                <div className="text-xs text-gray-500">of {task.assignedTo.length}</div>
-                                            </div>
-                                            <button
-                                                onClick={() => handleViewAssignees(task)}
-                                                className="px-3 py-1 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-1"
-                                            >
-                                                <Users className="w-3 h-3" />
-                                                {task.assignedTo.length}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                // Full View (existing layout)
+                        </div>) : (                        <div className="space-y-8">
+                            {paginatedItems.map(task => (
                                 <div key={task.id} className="glass-card glass-card-hover transition-all duration-300 p-8">
                                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">                                        <div className="flex-1">
                                             <h3 className="text-2xl font-bold text-gray-800 mb-3">{task.taskName}</h3>                                            <div className="flex flex-wrap items-center gap-3 text-gray-600 mb-3">
@@ -493,29 +494,9 @@ export default function ViewTasksPage() {
                                                     <Trash2 size={20} />
                                                 </button>
                                             </div>                                        </div>
-                                    </div>
-                                </div>                            ))}
-                        </div>
-                    )}
-
-                    {/* Pagination Controls */}
-                    {paginatedItems.length > 0 && (
-                        <div className="mt-12 flex justify-center">
-                            <PaginationControls
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                onPageChange={setCurrentPage}
-                                itemsPerPage={itemsPerPage}
-                                onItemsPerPageChange={setItemsPerPage}
-                                totalItems={totalItems}
-                                isCompactView={isCompactView}
-                                onToggleView={() => setIsCompactView(!isCompactView)}
-                                searchTerm={searchTerm}
-                                onSearchChange={setSearchTerm}
-                                showArchiveToggle={false}
-                            />
-                        </div>
-                    )}
+                                    </div>                                </div>
+                            ))}
+                        </div>)}
                 </div>
             </main>
 

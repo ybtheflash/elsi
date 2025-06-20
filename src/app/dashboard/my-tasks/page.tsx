@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLoading } from '@/context/LoadingContext';
 import Header from '@/components/dashboard/Header';
 import { db } from '@/lib/firebase';
 import { storage } from '@/lib/appwrite';
@@ -28,6 +29,7 @@ type Task = {
 
 export default function MyTasksPage() {
     const { user } = useAuth();
+    const { setLoading: setGlobalLoading } = useLoading();
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -77,6 +79,8 @@ export default function MyTasksPage() {
                 setTasks([]);
             } finally {
                 setLoading(false);
+                // Turn off global loading when this page is ready
+                setGlobalLoading(false);
             }
         };
         fetchTasks();

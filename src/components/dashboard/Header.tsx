@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { useLoading } from '@/context/LoadingContext';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import Link from 'next/link';
@@ -18,6 +19,7 @@ interface HeaderProps {
 
 export default function Header({ title }: HeaderProps) {
     const { user } = useAuth();
+    const { setLoading } = useLoading();
     const router = useRouter();
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -56,10 +58,17 @@ export default function Header({ title }: HeaderProps) {
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
-    };
-
-    const closeMobileMenu = () => {
+    };    const closeMobileMenu = () => {
         setIsMobileMenuOpen(false);
+    };    const handleNavigation = (href: string) => {
+        if (pathname !== href) {
+            setLoading(true);
+            closeMobileMenu();
+            // Navigate immediately without delay
+            router.push(href);
+        } else {
+            closeMobileMenu();
+        }
     };const navLinkClasses = "flex items-center gap-2 px-3 py-2 text-sm font-medium transition-all duration-200 hover:scale-105 whitespace-nowrap";
     const activeLinkClasses = "bg-white/90 text-indigo-700 shadow-lg backdrop-blur-sm border border-white/30 rounded-xl";
     const inactiveLinkClasses = "text-white/90 hover:bg-white/20 hover:text-white backdrop-blur-sm rounded-xl";
@@ -136,53 +145,71 @@ export default function Header({ title }: HeaderProps) {
                             <span className="font-medium">Logout</span>
                         </Button>
                     </div>
-                </div>
-
-                {/* Desktop Navigation */}
+                </div>                {/* Desktop Navigation */}
                 <nav className="hidden lg:flex items-center gap-2 overflow-x-auto pb-2 mt-3 scrollbar-hide">
                     {user?.role === 'intern' && (
                         <>
-                            <Link href="/dashboard" className={`${navLinkClasses} ${pathname === '/dashboard' ? activeLinkClasses : inactiveLinkClasses}`}>
+                            <button 
+                                onClick={() => handleNavigation('/dashboard')} 
+                                className={`${navLinkClasses} ${pathname === '/dashboard' ? activeLinkClasses : inactiveLinkClasses}`}
+                            >
                                 <Send size={18} />
                                 <span>Submit Work</span>
-                            </Link>
-                            <Link href="/dashboard/my-tasks" className={`${navLinkClasses} ${pathname === '/dashboard/my-tasks' ? activeLinkClasses : inactiveLinkClasses}`}>
+                            </button>
+                            <button 
+                                onClick={() => handleNavigation('/dashboard/my-tasks')} 
+                                className={`${navLinkClasses} ${pathname === '/dashboard/my-tasks' ? activeLinkClasses : inactiveLinkClasses}`}
+                            >
                                 <ClipboardCheck size={18} />
                                 <span>My Tasks</span>
-                            </Link>
-                            <Link href="/dashboard/my-submissions" className={`${navLinkClasses} ${pathname === '/dashboard/my-submissions' ? activeLinkClasses : inactiveLinkClasses}`}>
+                            </button>
+                            <button 
+                                onClick={() => handleNavigation('/dashboard/my-submissions')} 
+                                className={`${navLinkClasses} ${pathname === '/dashboard/my-submissions' ? activeLinkClasses : inactiveLinkClasses}`}
+                            >
                                 <ListChecks size={18} />
                                 <span>My Submissions</span>
-                            </Link>
+                            </button>
                         </>
-                    )}
-
-                    {(user?.role === 'admin' || user?.role === 'super-admin') && (
+                    )}                    {(user?.role === 'admin' || user?.role === 'super-admin') && (
                         <>
-                            <Link href="/dashboard" className={`${navLinkClasses} ${pathname === '/dashboard' ? activeLinkClasses : inactiveLinkClasses}`}>
+                            <button 
+                                onClick={() => handleNavigation('/dashboard')} 
+                                className={`${navLinkClasses} ${pathname === '/dashboard' ? activeLinkClasses : inactiveLinkClasses}`}
+                            >
                                 <LayoutDashboard size={18} />
                                 <span>Review</span>
-                            </Link>
-                            <Link href="/dashboard/health" className={`${navLinkClasses} ${pathname === '/dashboard/health' ? activeLinkClasses : inactiveLinkClasses}`}>
+                            </button>
+                            <button 
+                                onClick={() => handleNavigation('/dashboard/health')} 
+                                className={`${navLinkClasses} ${pathname === '/dashboard/health' ? activeLinkClasses : inactiveLinkClasses}`}
+                            >
                                 <HeartPulse size={18} />
                                 <span>Analytics</span>
-                            </Link>
-                            <Link href="/dashboard/allot-task" className={`${navLinkClasses} ${pathname === '/dashboard/allot-task' ? activeLinkClasses : inactiveLinkClasses}`}>
+                            </button>
+                            <button 
+                                onClick={() => handleNavigation('/dashboard/allot-task')} 
+                                className={`${navLinkClasses} ${pathname === '/dashboard/allot-task' ? activeLinkClasses : inactiveLinkClasses}`}
+                            >
                                 <ClipboardList size={18} />
                                 <span>Assign Tasks</span>
-                            </Link>
-                            <Link href="/dashboard/view-tasks" className={`${navLinkClasses} ${pathname === '/dashboard/view-tasks' ? activeLinkClasses : inactiveLinkClasses}`}>
+                            </button>
+                            <button 
+                                onClick={() => handleNavigation('/dashboard/view-tasks')} 
+                                className={`${navLinkClasses} ${pathname === '/dashboard/view-tasks' ? activeLinkClasses : inactiveLinkClasses}`}
+                            >
                                 <ClipboardEdit size={18} />
                                 <span>Manage Tasks</span>
-                            </Link>
+                            </button>
                         </>
-                    )}
-
-                    {user?.role === 'super-admin' && (
-                        <Link href="/dashboard/manage-users" className={`${navLinkClasses} ${pathname === '/dashboard/manage-users' ? activeLinkClasses : inactiveLinkClasses}`}>
+                    )}                    {user?.role === 'super-admin' && (
+                        <button 
+                            onClick={() => handleNavigation('/dashboard/manage-users')} 
+                            className={`${navLinkClasses} ${pathname === '/dashboard/manage-users' ? activeLinkClasses : inactiveLinkClasses}`}
+                        >
                             <Users size={18} />
                             <span>Manage Users</span>
-                        </Link>
+                        </button>
                     )}
                 </nav>
             </div>            {/* Mobile Menu Portal */}
@@ -211,85 +238,71 @@ export default function Header({ title }: HeaderProps) {
                                     </Badge>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Mobile Navigation */}
+                        </div>                        {/* Mobile Navigation */}
                         <nav className="px-4 py-4 space-y-1">
                             {user?.role === 'intern' && (
                                 <>
-                                    <Link 
-                                        href="/dashboard" 
-                                        onClick={closeMobileMenu}
+                                    <button 
+                                        onClick={() => handleNavigation('/dashboard')}
                                         className={`${navLinkClasses} ${pathname === '/dashboard' ? activeLinkClasses : inactiveLinkClasses} w-full justify-start`}
                                     >
                                         <Send size={18} />
                                         <span>Submit Work</span>
-                                    </Link>
-                                    <Link 
-                                        href="/dashboard/my-tasks" 
-                                        onClick={closeMobileMenu}
+                                    </button>
+                                    <button 
+                                        onClick={() => handleNavigation('/dashboard/my-tasks')}
                                         className={`${navLinkClasses} ${pathname === '/dashboard/my-tasks' ? activeLinkClasses : inactiveLinkClasses} w-full justify-start`}
                                     >
                                         <ClipboardCheck size={18} />
                                         <span>My Tasks</span>
-                                    </Link>
-                                    <Link 
-                                        href="/dashboard/my-submissions" 
-                                        onClick={closeMobileMenu}
+                                    </button>
+                                    <button 
+                                        onClick={() => handleNavigation('/dashboard/my-submissions')}
                                         className={`${navLinkClasses} ${pathname === '/dashboard/my-submissions' ? activeLinkClasses : inactiveLinkClasses} w-full justify-start`}
                                     >
                                         <ListChecks size={18} />
                                         <span>My Submissions</span>
-                                    </Link>
+                                    </button>
                                 </>
-                            )}
-
-                            {(user?.role === 'admin' || user?.role === 'super-admin') && (
+                            )}                            {(user?.role === 'admin' || user?.role === 'super-admin') && (
                                 <>
-                                    <Link 
-                                        href="/dashboard" 
-                                        onClick={closeMobileMenu}
+                                    <button 
+                                        onClick={() => handleNavigation('/dashboard')}
                                         className={`${navLinkClasses} ${pathname === '/dashboard' ? activeLinkClasses : inactiveLinkClasses} w-full justify-start`}
                                     >
                                         <LayoutDashboard size={18} />
                                         <span>Review</span>
-                                    </Link>
-                                    <Link 
-                                        href="/dashboard/health" 
-                                        onClick={closeMobileMenu}
+                                    </button>
+                                    <button 
+                                        onClick={() => handleNavigation('/dashboard/health')}
                                         className={`${navLinkClasses} ${pathname === '/dashboard/health' ? activeLinkClasses : inactiveLinkClasses} w-full justify-start`}
                                     >
                                         <HeartPulse size={18} />
                                         <span>Analytics</span>
-                                    </Link>
-                                    <Link 
-                                        href="/dashboard/allot-task" 
-                                        onClick={closeMobileMenu}
+                                    </button>
+                                    <button 
+                                        onClick={() => handleNavigation('/dashboard/allot-task')}
                                         className={`${navLinkClasses} ${pathname === '/dashboard/allot-task' ? activeLinkClasses : inactiveLinkClasses} w-full justify-start`}
                                     >
                                         <ClipboardList size={18} />
                                         <span>Assign Tasks</span>
-                                    </Link>
-                                    <Link 
-                                        href="/dashboard/view-tasks" 
-                                        onClick={closeMobileMenu}
+                                    </button>
+                                    <button 
+                                        onClick={() => handleNavigation('/dashboard/view-tasks')}
                                         className={`${navLinkClasses} ${pathname === '/dashboard/view-tasks' ? activeLinkClasses : inactiveLinkClasses} w-full justify-start`}
                                     >
                                         <ClipboardEdit size={18} />
                                         <span>Manage Tasks</span>
-                                    </Link>
+                                    </button>
                                 </>
-                            )}
-
-                            {user?.role === 'super-admin' && (
-                                <Link 
-                                    href="/dashboard/manage-users" 
-                                    onClick={closeMobileMenu}
+                            )}                            {user?.role === 'super-admin' && (
+                                <button 
+                                    onClick={() => handleNavigation('/dashboard/manage-users')}
                                     className={`${navLinkClasses} ${pathname === '/dashboard/manage-users' ? activeLinkClasses : inactiveLinkClasses} w-full justify-start`}
                                 >
                                     <Users size={18} />
                                     <span>Manage Users</span>
-                                </Link>
+                                </button>
                             )}
                         </nav>
 

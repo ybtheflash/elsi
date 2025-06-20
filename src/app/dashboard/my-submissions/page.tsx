@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/context/AuthContext';
+import { useLoading } from '@/context/LoadingContext';
 import { db, auth } from '@/lib/firebase';
 import { storage, ID } from '@/lib/appwrite';
 import { collection, query, where, onSnapshot, doc, updateDoc, addDoc, serverTimestamp, getDocs, deleteDoc } from 'firebase/firestore';
@@ -41,6 +42,7 @@ const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID!;
 
 export default function MySubmissionsPage() {
     const { user } = useAuth();
+    const { setLoading: setGlobalLoading } = useLoading();
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>([]);
     const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'revision_needed'>('pending');
@@ -91,14 +93,16 @@ export default function MySubmissionsPage() {
             const subs: Submission[] = [];
             querySnapshot.forEach((doc) => {
                 subs.push({ id: doc.id, ...doc.data() } as Submission);
-            });
-            setSubmissions(subs.sort((a, b) => {
+            });            setSubmissions(subs.sort((a, b) => {
                 // Handle null/undefined submittedAt values
                 const aTime = a.submittedAt?.toMillis ? a.submittedAt.toMillis() : 0;
                 const bTime = b.submittedAt?.toMillis ? b.submittedAt.toMillis() : 0;
                 return bTime - aTime;
             }));
-            setLoading(false);}, (error: any) => {
+            setLoading(false);
+            // Turn off global loading when this page is ready
+            setGlobalLoading(false);
+        }, (error: any) => {
             let errorMessage = "Failed to load submissions.";
             
             if (error.code === 'permission-denied') {
@@ -109,12 +113,12 @@ export default function MySubmissionsPage() {
             
             toast.error(errorMessage);
             setLoading(false);
+            // Turn off global loading even on error
+            setGlobalLoading(false);
             
             // Don't log detailed errors to console
-        });
-
-        return () => unsubscribe();
-    }, [user]);    const openEditModal = (sub: Submission, forResubmission = false) => {
+        });        return () => unsubscribe();
+    }, [user, setGlobalLoading]);const openEditModal = (sub: Submission, forResubmission = false) => {
         setEditingSubmission(sub);
         setIsResubmitting(forResubmission);
         setValue('title', sub.title);

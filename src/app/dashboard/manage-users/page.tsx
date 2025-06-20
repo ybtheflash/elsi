@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
+import { useLoading } from '@/context/LoadingContext';
 import Header from '@/components/dashboard/Header';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -19,6 +20,7 @@ type UserProfile = {
 
 export default function ManageUsersPage() {
     const { user } = useAuth();
+    const { setLoading: setGlobalLoading } = useLoading();
     const router = useRouter();
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -39,15 +41,15 @@ export default function ManageUsersPage() {
             } catch (error) {
                 console.warn('Failed to fetch users:', error);
                 toast.error('Failed to load users. Please refresh the page.');
-                setUsers([]); // Set empty array as fallback
-            } finally {
+                setUsers([]); // Set empty array as fallback            } finally {
                 setLoading(false);
+                // Turn off global loading when this page is ready
+                setGlobalLoading(false);
             }
-        };
-        if (user?.role === 'super-admin') {
+        };        if (user?.role === 'super-admin') {
             fetchUsers();
         }
-    }, [user]);    const handleRoleChange = async (uid: string, newRole: UserProfile['role']) => {
+    }, [user, setGlobalLoading]);const handleRoleChange = async (uid: string, newRole: UserProfile['role']) => {
         const userRef = doc(db, 'users', uid);
         try {
             await updateDoc(userRef, { role: newRole });

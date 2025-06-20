@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useAuth } from '@/context/AuthContext';
+import { useLoading } from '@/context/LoadingContext';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/dashboard/Header';
 import { db } from '@/lib/firebase';
@@ -26,7 +27,8 @@ const BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID!;
 
 export default function AllotTaskPage() {
     const { user } = useAuth();
-    const router = useRouter();    const [interns, setInterns] = useState<Intern[]>([]);
+    const { setLoading: setGlobalLoading } = useLoading();
+    const router = useRouter();const [interns, setInterns] = useState<Intern[]>([]);
     const [loading, setLoading] = useState(false);
     const [attachments, setAttachments] = useState<File[]>([]);
     const { register, handleSubmit, control, watch, setValue, reset, formState: { errors } } = useForm<FormData>({ 
@@ -43,8 +45,7 @@ export default function AllotTaskPage() {
             toast.error("Access Denied");
             router.push('/dashboard');
         }
-    }, [user, router]);
-      // Fetch all interns to populate checkboxes
+    }, [user, router]);      // Fetch all interns to populate checkboxes
     useEffect(() => {
         const fetchInterns = async () => {
             try {
@@ -56,10 +57,13 @@ export default function AllotTaskPage() {
                 console.warn('Failed to fetch interns:', error);
                 toast.error('Failed to load intern list. Please refresh the page.');
                 setInterns([]); // Set empty array as fallback
+            } finally {
+                // Turn off global loading when this page is ready
+                setGlobalLoading(false);
             }
         };
         fetchInterns();
-    }, []);
+    }, [setGlobalLoading]);
 
     const selectedDomain = watch('domain');
 

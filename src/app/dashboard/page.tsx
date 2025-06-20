@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { useLoading } from '@/context/LoadingContext';
 import Header from '@/components/dashboard/Header';
 import SubmissionForm from '@/components/dashboard/SubmissionForm'; 
 import AdminView from '@/components/dashboard/AdminView';       
@@ -9,6 +10,12 @@ import { Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
+  const { setLoading: setGlobalLoading } = useLoading();
+  
+  // Turn off global loading when auth is complete
+  if (!loading && user) {
+    setGlobalLoading(false);
+  }
   // Show a loading state while we verify the user's role
   if (loading) {
     return (

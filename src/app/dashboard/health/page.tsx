@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
+import { useLoading } from '@/context/LoadingContext';
 import Header from '@/components/dashboard/Header';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { User, CheckCircle, Clock, XCircle, Award, TrendingUp, Users, Target, Loader2 } from 'lucide-react';
@@ -35,6 +36,7 @@ const COLORS = ['#10b981', '#f59e0b', '#ef4444']; // emerald, amber, red
 
 export default function HealthPage() {
     const { user } = useAuth();
+    const { setLoading: setGlobalLoading } = useLoading();
     const [stats, setStats] = useState<InternStats[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -70,14 +72,13 @@ export default function HealthPage() {
             setStats(computedStats);
         } catch (error) {
             console.warn('Failed to fetch health data:', error);
-            setStats([]);
-        } finally {
+            setStats([]);        } finally {
             setLoading(false);
+            // Turn off global loading when this page is ready
+            setGlobalLoading(false);
         }
-    };
-
-    fetchData();
-}, []);
+    };    fetchData();
+}, [setGlobalLoading]);
 
 const overallStats = {
     totalSubmissions: stats.reduce((acc, s) => acc + s.totalSubmissions, 0),
