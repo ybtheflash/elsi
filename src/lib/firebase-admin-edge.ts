@@ -10,16 +10,38 @@ export async function getFirebaseAdmin() {
         return firebaseApp;
     }
 
-    // Fetch the service account JSON from Edge Config
-    let serviceAccount = await get('firebaseServiceAccount');
-    if (typeof serviceAccount === 'string') {
-        try {
-            serviceAccount = JSON.parse(serviceAccount);
-        } catch (err) {
-            throw new Error('Failed to parse service account JSON string from Edge Config');
-        }
+    // Fetch each field from Edge Config as individual keys
+    const [type, project_id, private_key_id, private_key, client_email, client_id, auth_uri, token_uri, auth_provider_x509_cert_url, client_x509_cert_url, universe_domain] = await Promise.all([
+        get('type'),
+        get('project_id'),
+        get('private_key_id'),
+        get('private_key'),
+        get('client_email'),
+        get('client_id'),
+        get('auth_uri'),
+        get('token_uri'),
+        get('auth_provider_x509_cert_url'),
+        get('client_x509_cert_url'),
+        get('universe_domain'),
+    ]);
+
+    const serviceAccount = {
+        type,
+        project_id,
+        private_key_id,
+        private_key,
+        client_email,
+        client_id,
+        auth_uri,
+        token_uri,
+        auth_provider_x509_cert_url,
+        client_x509_cert_url,
+        universe_domain,
+    };
+
+    if (!serviceAccount.private_key || !serviceAccount.client_email || !serviceAccount.project_id) {
+        throw new Error('Missing required service account fields from Edge Config');
     }
-    if (!serviceAccount || typeof serviceAccount !== 'object') throw new Error('Missing or invalid service account in Edge Config');
 
     firebaseApp = admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
