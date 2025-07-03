@@ -11,7 +11,14 @@ export async function getFirebaseAdmin() {
     }
 
     // Fetch the service account JSON from Edge Config
-    const serviceAccount = await get('firebaseServiceAccount');
+    let serviceAccount = await get('firebaseServiceAccount');
+    if (typeof serviceAccount === 'string') {
+        try {
+            serviceAccount = JSON.parse(serviceAccount);
+        } catch (err) {
+            throw new Error('Failed to parse service account JSON string from Edge Config');
+        }
+    }
     if (!serviceAccount || typeof serviceAccount !== 'object') throw new Error('Missing or invalid service account in Edge Config');
 
     firebaseApp = admin.initializeApp({
