@@ -38,7 +38,8 @@ export async function POST(request: Request) {
         try {
             subDoc = await subDocRef.get();
         } catch (firestoreError) {
-            return NextResponse.json({ error: 'Database error occurred' }, { status: 500 });
+            // TEMP: Return actual error for debugging
+            return NextResponse.json({ error: 'Database error occurred', details: String(firestoreError) }, { status: 500 });
         }
 
         if (!subDoc.exists) {
