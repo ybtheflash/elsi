@@ -1,33 +1,45 @@
 import { NextResponse } from 'next/server';
 import * as admin from 'firebase-admin';
-import { getAuth } from 'firebase-admin/auth';
-
-// Initialize Firebase Admin SDK (if not already done elsewhere)
-if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert({
-            projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        }),
-    });
-}
-const db = admin.firestore();
+import { getFirestore, getAuth } from '@/lib/firebase-admin';
 
 export async function POST(request: Request) {
     try {
+        let db;
+        try {
+            db = getFirestore();
+        } catch (initError) {
+            return NextResponse.json({ error: 'Service configuration error' }, { status: 500 });
+        }
+
         const { submissionId } = await request.json();
+
+        if (!submissionId) {
+            return NextResponse.json({ error: 'Submission ID is required' }, { status: 400 });
+        }
+
         const token = request.headers.get('Authorization')?.split('Bearer ')[1];
 
         if (!token) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const decodedToken = await getAuth().verifyIdToken(token);
+        let decodedToken;
+        try {
+            decodedToken = await getAuth().verifyIdToken(token);
+        } catch (authError) {
+            return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+        }
+
         const userId = decodedToken.uid;
 
         const subDocRef = db.collection('submissions').doc(submissionId);
-        const subDoc = await subDocRef.get();
+        let subDoc;
+
+        try {
+            subDoc = await subDocRef.get();
+        } catch (firestoreError) {
+            return NextResponse.json({ error: 'Database error occurred' }, { status: 500 });
+        }
 
         if (!subDoc.exists) {
             return NextResponse.json({ error: 'Submission not found' }, { status: 404 });
@@ -44,22 +56,29 @@ export async function POST(request: Request) {
         }
 
         // Action 1: Delete the submission document
-        await subDocRef.delete();
+        try {
+            await subDocRef.delete();
+        } catch (deleteError) {
+            return NextResponse.json({ error: 'Failed to delete submission' }, { status: 500 });
+        }
 
         // Action 2: Log the recall action in a new subcollection on the user
-        const logRef = db.collection('users').doc(userId).collection('activityLogs').doc();
-        await logRef.set({
-            action: 'recalled_submission',
-            details: `Recalled submission titled: "${submission.title}"`,
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        });
-
-        // We can consider deleting associated Appwrite files here too, but for simplicity, we'll leave them.
+        try {
+            const logRef = db.collection('users').doc(userId).collection('activityLogs').doc();
+            await logRef.set({
+                action: 'recalled_submission',
+                details: `Recalled submission titled: "${submission.title || 'Unknown'}"`,
+                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            });
+        } catch (logError) {
+            // Don't fail the whole operation if logging fails
+            // The submission has already been deleted successfully
+        }
 
         return NextResponse.json({ message: 'Submission successfully recalled.' }, { status: 200 });
 
     } catch (error: any) {
-        console.error("Recall Submission Error:", error);
+        // Return generic error without exposing internal details
         return NextResponse.json({ error: 'An internal server error occurred.' }, { status: 500 });
     }
 }
