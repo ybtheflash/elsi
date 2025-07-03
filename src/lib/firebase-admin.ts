@@ -21,24 +21,11 @@ export function getFirebaseAdmin() {
     }
 
     try {
-        // Handle different private key formats from environment variables
-        let formattedPrivateKey = privateKey;
-
-        // If the key contains literal \n characters, replace them with actual newlines
-        if (formattedPrivateKey.includes('\\n')) {
-            formattedPrivateKey = formattedPrivateKey.replace(/\\n/g, '\n');
-        }
-
-        // If the key doesn't start with -----BEGIN, it might need formatting
-        if (!formattedPrivateKey.includes('-----BEGIN')) {
-            throw new Error('Invalid private key format');
-        }
-
         firebaseApp = admin.initializeApp({
             credential: admin.credential.cert({
                 projectId,
                 clientEmail,
-                privateKey: formattedPrivateKey,
+                privateKey, // Use as-is, no replace
             }),
         });
         return firebaseApp;
